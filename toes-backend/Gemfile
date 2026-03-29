@@ -1,0 +1,34 @@
+source "https://rubygems.org"
+
+gem "rails", "~> 8.0.3"
+gem "pg", "~> 1.1"
+gem "puma", ">= 5.0"
+
+# Auth & security
+gem "bcrypt", "~> 3.1.7"
+gem "jwt", "~> 2.9"
+gem "rack-cors"
+gem "rack-attack"
+
+# Redis (required for ActionCable adapter)
+gem "redis", "~> 5.0"
+
+# File uploads
+gem "cloudinary", "~> 2.0"
+gem "image_processing", "~> 1.2"
+
+# Rails 8 database-backed adapters
+gem "solid_cache"
+gem "solid_queue"
+gem "solid_cable"
+
+# Boot performance
+gem "bootsnap", require: false
+
+# Timezone data for Windows/JRuby
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+
+group :development, :test do
+  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "brakeman", require: false
+end
