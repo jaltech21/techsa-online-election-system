@@ -1,9 +1,12 @@
 # Seed initial admin user
 # Credentials can be overridden via environment variables in production
-admin = AdminUser.find_or_create_by!(username: ENV.fetch("ADMIN_USERNAME", "admin")) do |a|
-  a.password = ENV.fetch("ADMIN_PASSWORD", "changeme123!")
-  a.password_confirmation = ENV.fetch("ADMIN_PASSWORD", "changeme123!")
-end
+admin_username = ENV.fetch("ADMIN_USERNAME", "techsa.unimtech.edu@gmail.com")
+admin_password = ENV.fetch("ADMIN_PASSWORD", "TechsaUmt@2026!")
+
+admin = AdminUser.find_or_initialize_by(username: admin_username)
+admin.password = admin_password
+admin.password_confirmation = admin_password
+admin.save!
 
 puts "Admin user ready: #{admin.username}"
 
