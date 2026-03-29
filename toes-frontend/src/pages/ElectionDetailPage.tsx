@@ -34,6 +34,7 @@ export default function ElectionDetailPage() {
   const [submitting, setSubmitting] = useState(false)
   const [voted, setVoted] = useState(false)
   const [error, setError] = useState('')
+  const [chatOpen, setChatOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -175,12 +176,25 @@ export default function ElectionDetailPage() {
         </div>
       )}
 
-      {/* LIVE CHAT */}
+      {/* LIVE CHAT — floating button + popup */}
       {(isOpen || isClosed) && (
-        <div className="mb-8">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">💬 Discussion</h2>
-          <ChatBox electionId={election.id} />
-        </div>
+        <>
+          <button
+            onClick={() => setChatOpen(true)}
+            className="fixed bottom-6 right-6 z-30 bg-indigo-600 text-white rounded-2xl pl-4 pr-5 py-3 flex items-center gap-2.5 shadow-xl hover:bg-indigo-700 active:scale-95 transition-all font-semibold text-sm"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Live Chat
+          </button>
+          <ChatBox
+            electionId={election.id}
+            isOpen={chatOpen}
+            onClose={() => setChatOpen(false)}
+          />
+        </>
       )}
 
       {/* CANDIDATE Q&A */}

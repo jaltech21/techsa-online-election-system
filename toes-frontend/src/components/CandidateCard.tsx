@@ -20,41 +20,63 @@ export default function CandidateCard({ candidate, selected, onSelect, showVoteC
   return (
     <div
       onClick={() => onSelect?.(candidate.id)}
-      className={`rounded-2xl p-4 flex gap-4 border-2 transition-all duration-150
-        ${onSelect ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
+      className={`rounded-2xl p-4 flex gap-4 border-2 transition-all duration-150 relative
+        ${onSelect ? 'cursor-pointer' : 'cursor-default'}
         ${selected
-          ? 'border-indigo-500 bg-indigo-50 shadow-md'
-          : 'border-slate-200 bg-white hover:border-indigo-300'
+          ? 'border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-100'
+          : 'border-slate-200 bg-white hover:border-indigo-300 hover:shadow-sm'
         }`}
     >
+      {/* Selection indicator strip */}
+      {selected && (
+        <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-full" />
+      )}
+
+      {/* Avatar */}
       {candidate.photo_url ? (
         <img
           src={candidate.photo_url}
           alt={candidate.name}
-          className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 shadow-sm"
+          className="w-14 h-14 rounded-2xl object-cover flex-shrink-0 shadow-sm"
         />
       ) : (
-        <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600 flex-shrink-0">
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-extrabold flex-shrink-0 transition-colors ${
+          selected ? 'bg-indigo-200 text-indigo-700' : 'bg-indigo-100 text-indigo-500'
+        }`}>
           {candidate.name[0]}
         </div>
       )}
+
+      {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 flex-wrap">
-          <h3 className="font-bold text-slate-800 text-base leading-tight">{candidate.name}</h3>
+          <h3 className="font-bold text-slate-800 text-[15px] leading-tight">{candidate.name}</h3>
           {selected && (
-            <span className="inline-flex items-center gap-1 bg-indigo-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
-              ✓ Selected
+            <span className="inline-flex items-center gap-1 bg-indigo-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Selected
             </span>
           )}
           {showVoteCount && (
-            <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">
               {voteCount ?? 0} votes
             </span>
           )}
         </div>
-        <p className="text-indigo-600 text-xs font-semibold mt-0.5 uppercase tracking-wide">{candidate.position}</p>
-        {candidate.bio && <p className="text-slate-500 text-sm mt-1.5 line-clamp-2">{candidate.bio}</p>}
+        <p className="text-indigo-500 text-[11px] font-bold mt-0.5 uppercase tracking-widest">{candidate.position}</p>
+        {candidate.bio && <p className="text-slate-500 text-sm mt-1.5 line-clamp-2 leading-relaxed">{candidate.bio}</p>}
       </div>
+
+      {/* Radio indicator */}
+      {onSelect && !showVoteCount && (
+        <div className={`shrink-0 self-center w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+          selected ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'
+        }`}>
+          {selected && <div className="w-2 h-2 rounded-full bg-white" />}
+        </div>
+      )}
     </div>
   )
 }
