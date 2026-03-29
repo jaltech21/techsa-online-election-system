@@ -5,13 +5,15 @@ import { useAuth } from '../hooks/useAuth'
 import { PageLayout } from '../components/Navbar'
 import CandidateCard from '../components/CandidateCard'
 import ChatBox from '../components/ChatBox'
-import QASection from '../components/QASection'
+import CandidateDrawer from '../components/CandidateDrawer'
+import type { DrawerTab } from '../components/CandidateDrawer'
 
 interface Candidate {
   id: number
   name: string
   position: string
   bio?: string
+  manifesto?: string
   photo_url?: string | null
   votes?: number
 }
@@ -35,6 +37,13 @@ export default function ElectionDetailPage() {
   const [voted, setVoted] = useState(false)
   const [error, setError] = useState('')
   const [chatOpen, setChatOpen] = useState(false)
+  const [drawerCandidate, setDrawerCandidate] = useState<Candidate | null>(null)
+  const [drawerTab, setDrawerTab] = useState<DrawerTab>('manifesto')
+
+  const openDrawer = (candidate: Candidate, tab: DrawerTab) => {
+    setDrawerCandidate(candidate)
+    setDrawerTab(tab)
+  }
 
   useEffect(() => {
     if (!id) return
@@ -117,7 +126,7 @@ export default function ElectionDetailPage() {
             </div>
             <div className="space-y-3">
               {sorted.map((c, i) => (
-                <CandidateCard key={c.id} candidate={c} showVoteCount voteCount={c.votes} totalVotes={total} rank={i + 1} />
+                <CandidateCard key={c.id} candidate={c} showVoteCount voteCount={c.votes} totalVotes={total} rank={i + 1} onOpen={(tab) => openDrawer(c, tab)} />
               ))}
             </div>
           </div>
@@ -166,6 +175,7 @@ export default function ElectionDetailPage() {
                     candidate={c}
                     selected={selected === c.id}
                     onSelect={setSelected}
+                    onOpen={(tab) => openDrawer(c, tab)}
                   />
                 ))}
               </div>
@@ -192,7 +202,7 @@ export default function ElectionDetailPage() {
             <h2 className="text-xl font-extrabold text-slate-800">Candidates</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {candidates.map((c) => <CandidateCard key={c.id} candidate={c} />)}
+            {candidates.map((c) => <CandidateCard key={c.id} candidate={c} onOpen={(tab) => openDrawer(c, tab)} />)}
           </div>
           {candidates.length === 0 && <p className="text-slate-400 text-center py-10">No candidates registered yet.</p>}
         </div>
@@ -219,9 +229,13 @@ export default function ElectionDetailPage() {
         </>
       )}
 
-      {/* CANDIDATE Q&A */}
-      {(isOpen || isClosed) && candidates.length > 0 && (
-        <QASection candidates={candidates} />
+      {/* Candidate drawer — manifesto + Q&A slide-over */}
+      {drawerCandidate && (
+        <CandidateDrawer
+          candidate={drawerCandidate}
+          initialTab={drawerTab}
+          onClose={() => setDrawerCandidate(null)}
+        />
       )}
     </PageLayout>
   )
