@@ -83,22 +83,30 @@ export default function ElectionDetailPage() {
   const isOpen = election.status === 'open'
   const isClosed = election.status === 'closed'
 
+  const statusBadge = (
+    <span className={isOpen ? 'badge-open' : isClosed ? 'badge-closed' : 'badge-draft'}>
+      {election.status.toUpperCase()}
+    </span>
+  )
+
   return (
     <PageLayout>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{election.title}</h1>
-        {election.description && <p className="text-gray-500 mt-1">{election.description}</p>}
-        <span className={`inline-block mt-2 text-xs font-semibold px-2 py-0.5 rounded-full ${
-          isOpen ? 'bg-green-100 text-green-700' : isClosed ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'
-        }`}>
-          {election.status.toUpperCase()}
-        </span>
+      {/* Election header */}
+      <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-2xl p-7 mb-8 text-white shadow-lg">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold leading-tight">{election.title}</h1>
+            {election.description && <p className="text-indigo-200 mt-1.5 text-sm">{election.description}</p>}
+            <div className="mt-3">{statusBadge}</div>
+          </div>
+          <span className="text-4xl opacity-50 hidden sm:block">🗳️</span>
+        </div>
       </div>
 
       {/* RESULTS VIEW (when closed) */}
       {isClosed && election.results && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">Results</h2>
+          <h2 className="text-lg font-bold text-slate-800 mb-4">📊 Final Results</h2>
           <div className="space-y-3">
             {[...election.results].sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0)).map((c) => (
               <CandidateCard key={c.id} candidate={c} showVoteCount voteCount={c.votes} />
@@ -110,15 +118,24 @@ export default function ElectionDetailPage() {
       {/* VOTING VIEW */}
       {isOpen && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">Candidates</h2>
+          <h2 className="text-lg font-bold text-slate-800 mb-4">🧑‍💼 Candidates</h2>
 
           {voted ? (
-            <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl p-5 text-center font-semibold">
-              ✅ You have already voted in this election.
+            <div className="card bg-emerald-50 border-emerald-200 p-6 text-center">
+              <p className="text-2xl mb-2">✅</p>
+              <p className="font-bold text-emerald-700">Your vote has been recorded!</p>
+              <p className="text-emerald-600 text-sm mt-1">Results will be published once the election closes.</p>
             </div>
           ) : !user ? (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl p-5 text-center">
-              <button onClick={() => navigate('/login')} className="underline font-semibold">Login</button> to cast your vote.
+            <div className="card bg-amber-50 border-amber-200 p-6 text-center">
+              <p className="text-2xl mb-2">🔒</p>
+              <p className="text-slate-700 font-semibold">Login to cast your vote</p>
+              <button
+                onClick={() => navigate('/login')}
+                className="btn-primary mt-4 inline-block"
+              >
+                Sign In
+              </button>
             </div>
           ) : (
             <>
@@ -132,13 +149,15 @@ export default function ElectionDetailPage() {
                   />
                 ))}
               </div>
-              {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
+              {error && (
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-4 py-3 mt-4">{error}</div>
+              )}
               <button
                 onClick={submitVote}
                 disabled={!selected || submitting}
-                className="mt-5 w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 text-lg"
+                className="btn-primary w-full mt-6 py-4 text-base"
               >
-                {submitting ? 'Submitting…' : 'Cast Vote'}
+                {submitting ? 'Submitting…' : selected ? '🗳️ Cast My Vote' : 'Select a candidate above'}
               </button>
             </>
           )}
@@ -148,7 +167,7 @@ export default function ElectionDetailPage() {
       {/* CANDIDATE LIST (when draft) */}
       {election.status === 'draft' && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">Candidates</h2>
+          <h2 className="text-lg font-bold text-slate-800 mb-4">🧑‍💼 Candidates</h2>
           <div className="space-y-3">
             {candidates.map((c) => <CandidateCard key={c.id} candidate={c} />)}
           </div>
@@ -159,7 +178,7 @@ export default function ElectionDetailPage() {
       {/* LIVE CHAT */}
       {(isOpen || isClosed) && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">Discussion</h2>
+          <h2 className="text-lg font-bold text-slate-800 mb-4">💬 Discussion</h2>
           <ChatBox electionId={election.id} />
         </div>
       )}

@@ -20,31 +20,40 @@ export default function CandidateCard({ candidate, selected, onSelect, showVoteC
   return (
     <div
       onClick={() => onSelect?.(candidate.id)}
-      className={`border-2 rounded-xl p-4 flex gap-4 transition cursor-pointer
-        ${onSelect ? 'hover:border-blue-400' : 'cursor-default'}
-        ${selected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white'}`}
+      className={`rounded-2xl p-4 flex gap-4 border-2 transition-all duration-150
+        ${onSelect ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
+        ${selected
+          ? 'border-indigo-500 bg-indigo-50 shadow-md'
+          : 'border-slate-200 bg-white hover:border-indigo-300'
+        }`}
     >
       {candidate.photo_url ? (
         <img
           src={candidate.photo_url}
           alt={candidate.name}
-          className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+          className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 shadow-sm"
         />
       ) : (
-        <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-2xl flex-shrink-0">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600 flex-shrink-0">
           {candidate.name[0]}
         </div>
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 flex-wrap">
-          <h3 className="font-semibold text-lg leading-tight">{candidate.name}</h3>
-          {selected && <span className="text-blue-600 font-bold text-sm">✔ Selected</span>}
+          <h3 className="font-bold text-slate-800 text-base leading-tight">{candidate.name}</h3>
+          {selected && (
+            <span className="inline-flex items-center gap-1 bg-indigo-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+              ✓ Selected
+            </span>
+          )}
           {showVoteCount && (
-            <span className="text-sm text-gray-600 font-medium">{voteCount ?? 0} votes</span>
+            <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full">
+              {voteCount ?? 0} votes
+            </span>
           )}
         </div>
-        <p className="text-blue-700 text-sm font-medium">{candidate.position}</p>
-        {candidate.bio && <p className="text-gray-500 text-sm mt-1 line-clamp-2">{candidate.bio}</p>}
+        <p className="text-indigo-600 text-xs font-semibold mt-0.5 uppercase tracking-wide">{candidate.position}</p>
+        {candidate.bio && <p className="text-slate-500 text-sm mt-1.5 line-clamp-2">{candidate.bio}</p>}
       </div>
     </div>
   )

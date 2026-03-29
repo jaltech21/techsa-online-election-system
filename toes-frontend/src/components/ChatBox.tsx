@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import cable from '../lib/cable'
 import api from '../lib/api'
 import { useAuth } from '../hooks/useAuth'
@@ -49,22 +50,29 @@ export default function ChatBox({ electionId }: { electionId: number }) {
   }
 
   return (
-    <div className="border rounded-xl flex flex-col h-96 bg-white">
-      <div className="px-4 py-2 border-b font-semibold text-sm text-gray-700">💬 Live Chat</div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+    <div className="card flex flex-col h-96 overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2 bg-slate-50 rounded-t-2xl">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="font-bold text-sm text-slate-700">Live Chat</span>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5">
+        {messages.length === 0 && (
+          <p className="text-center text-slate-400 text-sm mt-8">No messages yet — start the conversation!</p>
+        )}
         {messages.map((m) => (
           <div key={m.id} className="text-sm">
-            <span className="font-semibold text-blue-700">{m.sender}: </span>
-            <span className="text-gray-800">{m.body}</span>
+            <span className="font-bold text-indigo-600">{m.sender}</span>
+            <span className="text-slate-400 mx-1">›</span>
+            <span className="text-slate-700">{m.body}</span>
           </div>
         ))}
         <div ref={bottomRef} />
       </div>
-      {user && (
-        <div className="border-t p-2 flex gap-2">
+      {user ? (
+        <div className="border-t border-slate-100 p-3 flex gap-2">
           <input
-            className="flex-1 border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            placeholder="Say something..."
+            className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            placeholder="Say something…"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && send()}
@@ -72,10 +80,14 @@ export default function ChatBox({ electionId }: { electionId: number }) {
           <button
             onClick={send}
             disabled={sending || !draft.trim()}
-            className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm disabled:opacity-50 hover:bg-blue-700"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 hover:bg-indigo-700 transition"
           >
             Send
           </button>
+        </div>
+      ) : (
+        <div className="border-t border-slate-100 p-3 text-center text-xs text-slate-400">
+          <Link to="/login" className="text-indigo-500 font-semibold hover:underline">Sign in</Link> to join the discussion
         </div>
       )}
     </div>

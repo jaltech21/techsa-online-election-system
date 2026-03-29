@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { PageLayout } from '../components/Navbar'
 
 export default function RegisterPage() {
   const { register, loading } = useAuth()
@@ -41,28 +40,37 @@ export default function RegisterPage() {
   )
 
   return (
-    <PageLayout>
-      <div className="max-w-md mx-auto mt-10">
-        <h1 className="text-2xl font-bold mb-6 text-center">Create Account</h1>
-        <form onSubmit={submit} className="bg-white rounded-xl shadow p-6 space-y-4">
-          {error && <p className="text-red-600 text-sm bg-red-50 rounded p-2">{error}</p>}
-          {field('student_id', 'Student ID')}
-          {field('name', 'Full Name')}
-          {field('email', 'Email (optional)', 'email')}
-          {field('password', 'Password', 'password')}
-          {field('password_confirmation', 'Confirm Password', 'password')}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? 'Creating account…' : 'Register'}
-          </button>
-        </form>
-        <p className="text-center text-sm mt-4 text-gray-600">
-          Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-700 via-indigo-600 to-indigo-800 flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        {/* Brand mark */}
+        <div className="text-center mb-8">
+          <span className="inline-flex items-center gap-2 text-white font-extrabold text-2xl">
+            <span className="bg-white/20 rounded-xl px-3 py-1">🗳️</span> TOES
+          </span>
+          <p className="text-indigo-200 text-sm mt-2">TECHSA Online Election System</p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-5">
+          <h1 className="text-xl font-bold text-slate-800">Create your account</h1>
+          {error && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-4 py-3">{error}</div>
+          )}
+          <form onSubmit={submit} className="space-y-4">
+            {field('student_id', 'Student ID')}
+            {field('name', 'Full Name')}
+            {field('email', 'Email (optional)', 'email')}
+            {field('password', 'Password', 'password')}
+            {field('password_confirmation', 'Confirm Password', 'password')}
+            <button type="submit" disabled={loading} className="btn-primary w-full mt-1">
+              {loading ? 'Creating account…' : 'Create Account'}
+            </button>
+          </form>
+          <p className="text-center text-sm text-slate-500">
+            Already registered?{' '}
+            <Link to="/login" className="text-indigo-600 font-semibold hover:underline">Sign in</Link>
+          </p>
+        </div>
       </div>
-    </PageLayout>
+    </div>
   )
 }
