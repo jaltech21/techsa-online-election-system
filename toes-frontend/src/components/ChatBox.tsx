@@ -39,7 +39,10 @@ export default function ChatBox({ electionId, isOpen, onClose }: Props) {
       { channel: 'ChatChannel', election_id: electionId },
       {
         received(msg: Message) {
-          setMessages((prev) => [...prev, msg])
+          // Deduplicate: skip if we already have this ID (from optimistic update)
+          setMessages((prev) =>
+            prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]
+          )
         },
         connected() { setOnlineCount((c) => c + 1) },
         disconnected() { setOnlineCount((c) => Math.max(1, c - 1)) },
@@ -57,10 +60,23 @@ export default function ChatBox({ electionId, isOpen, onClose }: Props) {
 
   const send = async () => {
     if (!draft.trim() || !user) return
+    const body = draft.trim()
+    const tempId = -(Date.now()) // negative so it never clashes with a real DB id
+    const optimistic: Message = { id: tempId, body, sender: user.name, created_at: new Date().toISOString() }
+
+    // Show the message immediately for the sender
+    setMessages((prev) => [...prev, optimistic])
+    setDraft('')
     setSending(true)
     try {
-      await api.post(`/elections/${electionId}/chat_messages`, { body: draft.trim() })
-      setDraft('')
+      const res = await api.post(`/elections/${electionId}/chat_messages`, { body })
+      // Swap temp id → real server id so the coming broadcast is deduplicated correctly
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...optimistic, id: res.data.id } : m))
+      )
+    } catch {
+      // Roll back the optimistic message on failure
+      setMessages((prev) => prev.filter((m) => m.id !== tempId))
     } finally {
       setSending(false)
     }
