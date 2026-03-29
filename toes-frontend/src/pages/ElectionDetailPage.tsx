@@ -105,42 +105,61 @@ export default function ElectionDetailPage() {
       </div>
 
       {/* RESULTS VIEW (when closed) */}
-      {isClosed && election.results && (
-        <div className="mb-8">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">📊 Final Results</h2>
-          <div className="space-y-3">
-            {[...election.results].sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0)).map((c) => (
-              <CandidateCard key={c.id} candidate={c} showVoteCount voteCount={c.votes} />
-            ))}
+      {isClosed && election.results && (() => {
+        const sorted = [...election.results].sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0))
+        const total = sorted.reduce((s, c) => s + (c.votes ?? 0), 0)
+        return (
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="text-xl">📊</span>
+              <h2 className="text-xl font-extrabold text-slate-800">Final Results</h2>
+              <span className="ml-auto text-sm text-slate-400 font-medium">{total} total vote{total !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="space-y-3">
+              {sorted.map((c, i) => (
+                <CandidateCard key={c.id} candidate={c} showVoteCount voteCount={c.votes} totalVotes={total} rank={i + 1} />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* VOTING VIEW */}
       {isOpen && (
-        <div className="mb-8">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">🧑‍💼 Candidates</h2>
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="text-xl">🗳️</span>
+            <h2 className="text-xl font-extrabold text-slate-800">Candidates</h2>
+            <span className="ml-auto text-sm text-slate-400 font-medium">{candidates.length} candidate{candidates.length !== 1 ? 's' : ''}</span>
+          </div>
 
           {voted ? (
-            <div className="card bg-emerald-50 border-emerald-200 p-6 text-center">
-              <p className="text-2xl mb-2">✅</p>
-              <p className="font-bold text-emerald-700">Your vote has been recorded!</p>
+            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-8 text-center">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="font-extrabold text-emerald-700 text-lg">Vote Recorded!</p>
               <p className="text-emerald-600 text-sm mt-1">Results will be published once the election closes.</p>
             </div>
           ) : !user ? (
-            <div className="card bg-amber-50 border-amber-200 p-6 text-center">
-              <p className="text-2xl mb-2">🔒</p>
-              <p className="text-slate-700 font-semibold">Login to cast your vote</p>
-              <button
-                onClick={() => navigate('/login')}
-                className="btn-primary mt-4 inline-block"
-              >
-                Sign In
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-8 text-center">
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <p className="text-slate-700 font-extrabold text-base">Login to cast your vote</p>
+              <p className="text-slate-500 text-sm mt-1 mb-4">You must be a registered student to vote.</p>
+              <button onClick={() => navigate('/login')} className="btn-primary">
+                Sign In to Vote
               </button>
             </div>
           ) : (
             <>
-              <div className="space-y-3">
+              {/* Candidate grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {candidates.map((c) => (
                   <CandidateCard
                     key={c.id}
@@ -151,7 +170,7 @@ export default function ElectionDetailPage() {
                 ))}
               </div>
               {error && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-4 py-3 mt-4">{error}</div>
+                <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-4 py-3 mt-5">{error}</div>
               )}
               <button
                 onClick={submitVote}
@@ -167,12 +186,15 @@ export default function ElectionDetailPage() {
 
       {/* CANDIDATE LIST (when draft) */}
       {election.status === 'draft' && (
-        <div className="mb-8">
-          <h2 className="text-lg font-bold text-slate-800 mb-4">🧑‍💼 Candidates</h2>
-          <div className="space-y-3">
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="text-xl">🗳️</span>
+            <h2 className="text-xl font-extrabold text-slate-800">Candidates</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {candidates.map((c) => <CandidateCard key={c.id} candidate={c} />)}
           </div>
-          {candidates.length === 0 && <p className="text-gray-500">No candidates yet.</p>}
+          {candidates.length === 0 && <p className="text-slate-400 text-center py-10">No candidates registered yet.</p>}
         </div>
       )}
 
