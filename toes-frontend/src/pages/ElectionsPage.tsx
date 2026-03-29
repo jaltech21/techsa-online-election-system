@@ -12,73 +12,120 @@ interface Election {
   ends_at?: string
 }
 
-const STATUS_CONFIG: Record<string, { label: string; dot: string; badge: string; card: string }> = {
-  open:   { label: 'Open',   dot: 'bg-emerald-500', badge: 'badge-open',   card: 'border-emerald-200 hover:border-emerald-400' },
-  closed: { label: 'Closed', dot: 'bg-rose-400',    badge: 'badge-closed', card: 'border-slate-200 hover:border-slate-300' },
-  draft:  { label: 'Draft',  dot: 'bg-slate-400',   badge: 'badge-draft',  card: 'border-slate-200 hover:border-indigo-300' },
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function ElectionCard({ e }: { e: Election }) {
-  const cfg = STATUS_CONFIG[e.status] ?? STATUS_CONFIG.draft
-  const dateRange = e.starts_at || e.ends_at
-    ? [e.starts_at && new Date(e.starts_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-       e.ends_at   && new Date(e.ends_at).toLocaleDateString('en-GB',   { day: 'numeric', month: 'short', year: 'numeric' })]
-      .filter(Boolean).join(' – ')
-    : null
+  const isOpen   = e.status === 'open'
+  const isClosed = e.status === 'closed'
+
+  const accent = isOpen
+    ? 'from-emerald-500 to-teal-500'
+    : isClosed ? 'from-rose-500 to-pink-500'
+    : 'from-slate-400 to-slate-500'
+
+  const border = isOpen
+    ? 'border-emerald-200 hover:border-emerald-400'
+    : isClosed ? 'border-slate-200 hover:border-slate-300'
+    : 'border-amber-200 hover:border-amber-300'
+
+  const iconBg = isOpen ? 'bg-emerald-100' : isClosed ? 'bg-rose-100' : 'bg-amber-100'
+  const iconColor = isOpen ? 'text-emerald-600' : isClosed ? 'text-rose-500' : 'text-amber-600'
+
+  const statusLabel = isOpen ? 'Open' : isClosed ? 'Closed' : 'Draft'
+  const statusCls   = isOpen ? 'badge-open' : isClosed ? 'badge-closed' : 'badge-draft'
+  const liveText    = isOpen ? 'Voting live now' : isClosed ? 'Voting ended' : 'Coming soon'
+  const dotCls      = isOpen ? 'bg-emerald-500 animate-pulse' : isClosed ? 'bg-rose-400' : 'bg-amber-400'
 
   return (
     <Link
       to={`/elections/${e.id}`}
-      className={`group bg-white rounded-2xl border-2 ${cfg.card} shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col`}
+      className={`group bg-white rounded-2xl border-2 ${border} shadow-sm hover:shadow-xl transition-all duration-200 overflow-hidden flex flex-col`}
     >
-      {/* Coloured top accent */}
-      <div className={`h-1.5 w-full ${
-        e.status === 'open' ? 'bg-gradient-to-r from-emerald-400 to-teal-500'
-        : e.status === 'closed' ? 'bg-gradient-to-r from-rose-400 to-pink-500'
-        : 'bg-gradient-to-r from-slate-300 to-slate-400'
-      }`} />
+      {/* Gradient accent bar */}
+      <div className={`h-1 bg-gradient-to-r ${accent}`} />
 
-      <div className="p-6 flex-1 flex flex-col">
-        {/* Header row */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="w-11 h-11 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 group-hover:bg-indigo-200 transition-colors">
-            <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="p-5 flex-1 flex flex-col">
+        {/* Top row: icon + status badge */}
+        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'12px', marginBottom:'14px' }}>
+          <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
+            <svg className={`w-5 h-5 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
           </div>
-          <span className={cfg.badge}>{cfg.label}</span>
+          <span className={statusCls}>{statusLabel}</span>
         </div>
 
-        {/* Title & description */}
-        <h2 className="text-[17px] font-extrabold text-slate-800 leading-snug group-hover:text-indigo-700 transition-colors">
+        {/* Title */}
+        <h2 className="text-[16px] font-extrabold text-slate-800 leading-snug group-hover:text-indigo-700 transition-colors">
           {e.title}
         </h2>
+
+        {/* Description */}
         {e.description && (
-          <p className="text-slate-500 text-sm mt-2 line-clamp-2 leading-relaxed">{e.description}</p>
+          <p className="text-slate-500 text-[13px] mt-1.5 line-clamp-2 leading-relaxed">{e.description}</p>
         )}
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Footer row */}
-        <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
-          <div className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${cfg.dot} ${
-              e.status === 'open' ? 'animate-pulse' : ''
-            }`} />
-            <span className="text-xs text-slate-500 font-medium">
-              {e.status === 'open' ? 'Voting live now' : e.status === 'closed' ? 'Ended' : 'Coming soon'}
+        {/* Date range */}
+        {(e.starts_at || e.ends_at) && (
+          <div style={{ display:'flex', alignItems:'center', gap:'5px' }} className="mt-3">
+            <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-[12px] text-slate-400">
+              {[e.starts_at && fmtDate(e.starts_at), e.ends_at && fmtDate(e.ends_at)].filter(Boolean).join(' – ')}
             </span>
           </div>
-          {dateRange && <span className="text-xs text-slate-400">{dateRange}</span>}
-          <span className="text-indigo-500 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-            View →
+        )}
+
+        <div className="flex-1" />
+
+        {/* Footer */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}
+             className="mt-5 pt-4 border-t border-slate-100">
+          <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+            <span className={`w-2 h-2 rounded-full shrink-0 ${dotCls}`} />
+            <span className="text-[12px] text-slate-500 font-medium">{liveText}</span>
+          </div>
+          <span className="text-indigo-500 text-[12px] font-bold flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            View
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
           </span>
         </div>
       </div>
     </Link>
   )
 }
+
+const STATS = [
+  {
+    key: 'active', label: 'Active Elections', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100',
+    icon: (
+      <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    key: 'closed', label: 'Closed Elections', color: 'text-slate-600', bg: 'bg-white', border: 'border-slate-200',
+    icon: (
+      <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+    ),
+  },
+  {
+    key: 'draft', label: 'Upcoming', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100',
+    icon: (
+      <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+]
 
 export default function ElectionsPage() {
   const [elections, setElections] = useState<Election[]>([])
@@ -91,18 +138,19 @@ export default function ElectionsPage() {
   const open   = elections.filter((e) => e.status === 'open')
   const closed = elections.filter((e) => e.status === 'closed')
   const draft  = elections.filter((e) => e.status === 'draft')
+  const counts: Record<string, number> = { active: open.length, closed: closed.length, draft: draft.length }
 
   if (loading) return (
     <PageLayout>
       <div className="animate-pulse space-y-6">
-        <div className="h-8 bg-slate-200 rounded-xl w-48" />
+        <div className="h-8 bg-slate-200 rounded-xl w-40" />
+        <div className="grid grid-cols-3 gap-4">
+          {[0,1,2].map(i => <div key={i} className="bg-white rounded-2xl border border-slate-200 h-24" />)}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {[0,1,2].map(i => (
-            <div key={i} className="bg-white rounded-2xl border-2 border-slate-200 p-6 h-52">
-              <div className="h-11 w-11 bg-slate-200 rounded-xl mb-4" />
-              <div className="h-5 bg-slate-200 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-slate-100 rounded w-full mb-1" />
-              <div className="h-3 bg-slate-100 rounded w-4/5" />
+            <div key={i} className="bg-white rounded-2xl border-2 border-slate-200 h-48">
+              <div className="h-1 bg-slate-200 rounded-t-xl" />
             </div>
           ))}
         </div>
@@ -113,69 +161,78 @@ export default function ElectionsPage() {
   return (
     <PageLayout>
       {/* Page header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-2xl">🗳️</span>
-          <h1 className="text-2xl font-extrabold text-slate-800">Elections</h1>
-        </div>
-        <p className="text-slate-500 text-sm">Review active elections and cast your vote.</p>
+      <div className="mb-7">
+        <h1 className="text-2xl font-extrabold text-slate-900">Elections</h1>
+        <p className="text-slate-500 text-sm mt-0.5">Review active elections and cast your vote.</p>
       </div>
 
-      {/* Stats strip */}
+      {/* Stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-8">
-        {[
-          { label: 'Active', count: open.length,   color: 'text-emerald-600', bg: 'bg-emerald-50  border-emerald-100' },
-          { label: 'Closed', count: closed.length, color: 'text-rose-500',    bg: 'bg-rose-50    border-rose-100' },
-          { label: 'Draft',  count: draft.length,  color: 'text-slate-500',   bg: 'bg-slate-50   border-slate-200' },
-        ].map(s => (
-          <div key={s.label} className={`${s.bg} border rounded-2xl px-5 py-4`}>
-            <p className={`text-2xl font-extrabold ${s.color}`}>{s.count}</p>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">{s.label}</p>
+        {STATS.map(s => (
+          <div key={s.key} className={`${s.bg} border ${s.border} rounded-2xl px-5 py-4`}
+               style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'12px' }}>
+            <div>
+              <p className={`text-3xl font-extrabold leading-none ${s.color}`}>{counts[s.key]}</p>
+              <p className="text-[12px] text-slate-500 font-medium mt-1.5">{s.label}</p>
+            </div>
+            <div className="mt-0.5">{s.icon}</div>
           </div>
         ))}
       </div>
 
+      {/* Election sections */}
       {elections.length === 0 ? (
-        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-16 text-center">
-          <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🗳️</div>
+        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 py-20 text-center">
+          <div className="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
           <p className="font-bold text-slate-700">No elections yet</p>
           <p className="text-slate-400 text-sm mt-1">Check back later.</p>
         </div>
       ) : (
         <div className="space-y-10">
+
           {open.length > 0 && (
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <h2 className="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Live Now</h2>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px' }} className="mb-4">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <h2 className="text-[11px] font-extrabold text-slate-500 uppercase tracking-[0.12em]">Live Now</h2>
+                <span className="ml-auto text-[12px] text-slate-400">{open.length} election{open.length > 1 ? 's' : ''}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {open.map(e => <ElectionCard key={e.id} e={e} />)}
               </div>
             </section>
           )}
+
           {draft.length > 0 && (
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-                <h2 className="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Upcoming</h2>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px' }} className="mb-4">
+                <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                <h2 className="text-[11px] font-extrabold text-slate-500 uppercase tracking-[0.12em]">Upcoming</h2>
+                <span className="ml-auto text-[12px] text-slate-400">{draft.length} election{draft.length > 1 ? 's' : ''}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {draft.map(e => <ElectionCard key={e.id} e={e} />)}
               </div>
             </section>
           )}
+
           {closed.length > 0 && (
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
-                <h2 className="font-extrabold text-slate-700 text-sm uppercase tracking-widest">Past Elections</h2>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px' }} className="mb-4">
+                <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+                <h2 className="text-[11px] font-extrabold text-slate-500 uppercase tracking-[0.12em]">Past Elections</h2>
+                <span className="ml-auto text-[12px] text-slate-400">{closed.length} election{closed.length > 1 ? 's' : ''}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {closed.map(e => <ElectionCard key={e.id} e={e} />)}
               </div>
             </section>
           )}
+
         </div>
       )}
     </PageLayout>
