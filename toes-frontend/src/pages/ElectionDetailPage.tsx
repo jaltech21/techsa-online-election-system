@@ -36,7 +36,7 @@ interface Turnout {
   turnout_percent: number
 }
 
-function CountdownTimer({ endsAt }: { endsAt: string }) {
+function CountdownTimer({ endsAt, className = 'font-mono font-bold text-emerald-700' }: { endsAt: string; className?: string }) {
   const [remaining, setRemaining] = useState('')
   useEffect(() => {
     const tick = () => {
@@ -51,7 +51,7 @@ function CountdownTimer({ endsAt }: { endsAt: string }) {
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [endsAt])
-  return <span className="font-mono font-bold text-emerald-700">{remaining}</span>
+  return <span className={className}>{remaining}</span>
 }
 
 function generateShareCard() {
@@ -226,6 +226,16 @@ export default function ElectionDetailPage() {
                 style={{ width: `${Math.min(turnout.turnout_percent, 100)}%` }}
               />
             </div>
+          </div>
+        )}
+        {/* Voting closes countdown — set by admin */}
+        {isOpen && election.ends_at && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="mt-4 bg-white/10 rounded-xl px-4 py-2.5">
+            <svg className="w-4 h-4 text-indigo-200 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-indigo-100 text-sm">Voting closes in</span>
+            <CountdownTimer endsAt={election.ends_at} className="font-mono font-bold text-white text-sm" />
           </div>
         )}
       </div>

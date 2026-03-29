@@ -1,5 +1,56 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import api from '../lib/api'
+
+interface LiveElection {
+  id: number
+  title: string
+  status: string
+  starts_at: string | null
+  ends_at: string | null
+}
+
+function LandingCountdown({ target, label }: { target: string; label: string }) {
+  const [parts, setParts] = useState({ h: 0, m: 0, s: 0, expired: false })
+  useEffect(() => {
+    const tick = () => {
+      const diff = new Date(target).getTime() - Date.now()
+      if (diff <= 0) { setParts((p) => ({ ...p, expired: true })); return }
+      setParts({
+        h: Math.floor(diff / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        s: Math.floor((diff % 60000) / 1000),
+        expired: false,
+      })
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [target])
+
+  if (parts.expired) return null
+  const pad = (n: number) => n.toString().padStart(2, '0')
+
+  return (
+    <div
+      style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}
+      className="bg-white/6 border border-white/12 backdrop-blur-sm rounded-2xl px-5 py-3.5"
+    >
+      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+      <div>
+        <p className="text-slate-400 text-[10px] font-extrabold uppercase tracking-[0.16em] leading-none mb-1.5">{label}</p>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+          {[{ v: parts.h, unit: 'h' }, { v: parts.m, unit: 'm' }, { v: parts.s, unit: 's' }].map(({ v, unit }) => (
+            <span key={unit} style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+              <span className="font-mono font-black text-white text-xl leading-none">{unit === 'h' ? v : pad(v)}</span>
+              <span className="text-slate-500 text-[11px] font-bold">{unit}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 /* ── Avatar seed data ──────────────────────────────────────────── */
 const AVATARS = [
@@ -100,6 +151,19 @@ const IcArrow = () => (
 
 /* ═══════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
+  const [liveElection, setLiveElection] = useState<LiveElection | null>(null)
+
+  useEffect(() => {
+    api.get('/elections').then((r) => {
+      const elections: LiveElection[] = r.data
+      const found =
+        elections.find((e) => e.status === 'open' && e.ends_at) ??
+        elections.find((e) => e.status === 'open') ??
+        elections.find((e) => e.status !== 'closed' && e.starts_at)
+      setLiveElection(found ?? null)
+    }).catch(() => {})
+  }, [])
+
   return (
     <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden">
 
@@ -205,6 +269,29 @@ export default function LandingPage() {
                 Run for Office <IcArrow />
               </Link>
             </div>
+
+            {/* Live election countdown — driven by admin-set ends_at / starts_at */}
+            {liveElection && (
+              <div className="mb-10">
+                {liveElection.status === 'open' && liveElection.ends_at ? (
+                  <>
+                    <p className="text-slate-500 text-xs font-semibold mb-2.5">
+                      <span className="text-emerald-400">●</span>{' '}
+                      {liveElection.title} · voting is open
+                    </p>
+                    <LandingCountdown target={liveElection.ends_at} label="Voting closes in" />
+                  </>
+                ) : liveElection.status !== 'closed' && liveElection.starts_at ? (
+                  <>
+                    <p className="text-slate-500 text-xs font-semibold mb-2.5">
+                      <span className="text-amber-400">●</span>{' '}
+                      {liveElection.title} · coming soon
+                    </p>
+                    <LandingCountdown target={liveElection.starts_at} label="Voting opens in" />
+                  </>
+                ) : null}
+              </div>
+            )}
 
             {/* Social proof */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>

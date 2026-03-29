@@ -20,6 +20,7 @@ function ElectionSkeleton() {
 
 interface Election {
   id: number; title: string; status: string; created_at: string
+  starts_at: string | null; ends_at: string | null
 }
 
 export default function AdminElectionsPage() {
@@ -28,8 +29,10 @@ export default function AdminElectionsPage() {
   const navigate = useNavigate()
   const [elections, setElections] = useState<Election[]>([])
   const [showCreate, setShowCreate] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '' })
+  const [form, setForm] = useState({ title: '', description: '', starts_at: '', ends_at: '' })
   const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editTimes, setEditTimes] = useState({ starts_at: '', ends_at: '' })
 
   const load = () => adminApi.get('/elections').then((r) => setElections(r.data)).finally(() => setLoading(false))
   useEffect(() => { load() }, [])
@@ -37,13 +40,22 @@ export default function AdminElectionsPage() {
   const create = async (e: React.FormEvent) => {
     e.preventDefault()
     await adminApi.post('/elections', form)
-    setForm({ title: '', description: '' })
+    setForm({ title: '', description: '', starts_at: '', ends_at: '' })
     setShowCreate(false)
     load()
   }
 
   const toggle = async (id: number) => {
     await adminApi.patch(`/elections/${id}/toggle_status`)
+    load()
+  }
+
+  const saveTimes = async (id: number) => {
+    await adminApi.patch(`/elections/${id}`, {
+      starts_at: editTimes.starts_at || null,
+      ends_at:   editTimes.ends_at   || null,
+    })
+    setEditingId(null)
     load()
   }
 
@@ -95,6 +107,26 @@ export default function AdminElectionsPage() {
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">Voting Opens (optional)</label>
+                <input
+                  type="datetime-local"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  value={form.starts_at}
+                  onChange={(e) => setForm({ ...form, starts_at: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 block mb-1">Voting Closes (countdown)</label>
+                <input
+                  type="datetime-local"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  value={form.ends_at}
+                  onChange={(e) => setForm({ ...form, ends_at: e.target.value })}
+                />
+              </div>
+            </div>
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => setShowCreate(false)} className="border px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
               <button type="submit" className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700">Create</button>
@@ -121,6 +153,20 @@ export default function AdminElectionsPage() {
                   <Link to={`/admin/elections/${e.id}/analytics`} className="border px-3 py-1 rounded-lg hover:bg-gray-50">Analytics</Link>
                   <Link to={`/admin/elections/${e.id}/qa`} className="border px-3 py-1 rounded-lg hover:bg-gray-50">Q&amp;A</Link>
                   <button
+                    onClick={() => {
+                      setEditingId(editingId === e.id ? null : e.id)
+                      setEditTimes({
+                        starts_at: e.starts_at ? e.starts_at.slice(0, 16) : '',
+                        ends_at:   e.ends_at   ? e.ends_at.slice(0, 16)   : '',
+                      })
+                    }}
+                    className={`border px-3 py-1 rounded-lg text-sm transition ${
+                      editingId === e.id ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    ⏱ Countdown
+                  </button>
+                  <button
                     onClick={() => toggle(e.id)}
                     className={`px-3 py-1 rounded-lg font-semibold ${
                       e.status === 'draft' ? 'bg-green-600 text-white hover:bg-green-700'
@@ -130,8 +176,48 @@ export default function AdminElectionsPage() {
                   >
                     {e.status === 'draft' ? 'Open' : e.status === 'open' ? 'Close' : 'Reopen'}
                   </button>
-                </div>
-              </div>
+                </div>                {editingId === e.id && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-3 space-y-3">
+                    <p className="text-sm font-semibold text-blue-800">⏱ Set countdown for "{e.title}"</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-gray-500 block mb-1">Voting Opens</label>
+                        <input
+                          type="datetime-local"
+                          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                          value={editTimes.starts_at}
+                          onChange={(ev) => setEditTimes({ ...editTimes, starts_at: ev.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-gray-500 block mb-1">Voting Closes</label>
+                        <input
+                          type="datetime-local"
+                          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                          value={editTimes.ends_at}
+                          onChange={(ev) => setEditTimes({ ...editTimes, ends_at: ev.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-blue-600">
+                      💡 "Voting Closes" drives the live countdown on the election page and landing page.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="border px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 bg-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => saveTimes(e.id)}
+                        className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700"
+                      >
+                        Save Countdown
+                      </button>
+                    </div>
+                  </div>
+                )}              </div>
             ))}
             {elections.length === 0 && <p className="text-gray-500">No elections yet.</p>}
           </div>
