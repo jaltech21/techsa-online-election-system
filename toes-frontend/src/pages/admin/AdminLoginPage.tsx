@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
     setLoading(true)
     try {
       await adminLogin(form.username, form.password)
-      navigate('/admin/elections')
+      navigate('/admin/dashboard')
     } catch {
       setError('Invalid credentials. Please try again.')
     } finally {

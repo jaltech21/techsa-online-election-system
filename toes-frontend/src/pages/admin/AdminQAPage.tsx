@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import api from '../../lib/api'
+import AdminShell from '../../components/admin/AdminShell'
 
 // Shared axios instance that adds admin Bearer token
 import axios from 'axios'
@@ -128,34 +129,29 @@ export default function AdminQAPage() {
   }, [id])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-gray-900 text-white px-6 py-3 flex justify-between items-center">
-        <Link to="/admin/elections" className="font-bold text-lg">← TOES Admin</Link>
-        <span className="text-sm opacity-70">Election #{id} — Q&amp;A Management</span>
-      </nav>
-
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-xl font-bold mb-6">Candidate Q&amp;A</h1>
-
-        {loading ? (
-          <div className="space-y-3">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="bg-white border rounded-xl p-4 h-20 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2" />
-                <div className="h-3 bg-gray-100 rounded w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : candidates.length === 0 ? (
-          <p className="text-gray-500">No candidates registered yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {candidates.map((c) => (
-              <CandidateQAPanel key={c.id} candidate={c} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <AdminShell title="Q&A Management" subtitle={`Election #${id} — answer candidate questions`}>
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '0.875rem', padding: '1.25rem', height: '5rem', animation: 'skeleton 1.4s ease-in-out infinite' }}>
+              <div style={{ height: '0.875rem', background: '#e2e8f0', borderRadius: '0.375rem', width: '33%', marginBottom: '0.375rem' }} />
+              <div style={{ height: '0.625rem', background: '#f1f5f9', borderRadius: '0.375rem', width: '50%' }} />
+            </div>
+          ))}
+          <style>{`@keyframes skeleton { 0%,100%{opacity:1} 50%{opacity:0.55} }`}</style>
+        </div>
+      ) : candidates.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '4rem', color: '#94a3b8', background: 'white', borderRadius: '0.875rem', border: '1px solid #e2e8f0' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>❓</div>
+          <p style={{ margin: 0 }}>No candidates registered yet.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {candidates.map((c) => (
+            <CandidateQAPanel key={c.id} candidate={c} />
+          ))}
+        </div>
+      )}
+    </AdminShell>
   )
 }

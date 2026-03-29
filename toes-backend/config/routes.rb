@@ -43,6 +43,8 @@ Rails.application.routes.draw do
       namespace :admin do
         post "auth/login", to: "auth#login"
 
+        get "dashboard", to: "dashboard#index"
+
         resources :elections, only: [:index, :show, :create, :update] do
           member do
             patch :toggle_status

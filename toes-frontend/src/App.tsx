@@ -13,6 +13,7 @@ import CandidateRegisterPage from './pages/CandidateRegisterPage'
 
 import LandingPage from './pages/LandingPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminElectionsPage from './pages/admin/AdminElectionsPage'
 import AdminKeysPage from './pages/admin/AdminKeysPage'
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage'
@@ -37,6 +38,7 @@ export default function App() {
 
             {/* Admin */}
             <Route path="/admin" element={<AdminLoginPage />} />
+            <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboardPage /></RequireAdmin>} />
             <Route path="/admin/elections" element={<RequireAdmin><AdminElectionsPage /></RequireAdmin>} />
             <Route path="/admin/elections/:id/keys" element={<RequireAdmin><AdminKeysPage /></RequireAdmin>} />
             <Route path="/admin/elections/:id/analytics" element={<RequireAdmin><AdminAnalyticsPage /></RequireAdmin>} />

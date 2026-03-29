@@ -4,7 +4,14 @@ module Api
       class ElectionsController < BaseController
         def index
           elections = Election.order(created_at: :desc)
-          render json: elections
+          vote_counts = Vote.group(:election_id).count
+          total_voters = User.count
+          render json: elections.map { |e|
+            e.as_json.merge(
+              votes_cast:   vote_counts[e.id] || 0,
+              total_voters: total_voters
+            )
+          }
         end
 
         def show
