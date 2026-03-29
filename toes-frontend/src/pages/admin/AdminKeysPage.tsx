@@ -60,8 +60,9 @@ export default function AdminKeysPage() {
           ) : keys.length === 0 ? (
             <p className="p-4 text-gray-500 text-sm">No keys yet. Generate some above.</p>
           ) : (
-            keys.map((k) => (
-              <div key={k.id} className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-2.5 border-b last:border-0 gap-3">
+            <div className="overflow-x-auto">
+            {keys.map((k) => (
+              <div key={k.id} className="grid grid-cols-[1fr_auto_auto] items-center px-4 py-2.5 border-b last:border-0 gap-3 min-w-[400px]">
                 <code className="text-xs text-gray-700 truncate">{k.token}</code>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${k.used ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
                   {k.used ? 'USED' : 'UNUSED'}
@@ -73,7 +74,8 @@ export default function AdminKeysPage() {
                   {copied === k.id ? '✓ Copied' : 'Copy'}
                 </button>
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
 

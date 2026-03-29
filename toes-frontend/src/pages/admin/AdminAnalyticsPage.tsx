@@ -56,7 +56,7 @@ export default function AdminAnalyticsPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Summary cards */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Total Voters', value: data.total_voters },
             { label: 'Votes Cast', value: data.votes_cast },

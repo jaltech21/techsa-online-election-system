@@ -36,7 +36,7 @@ export default function CandidateCard({ candidate, selected, onSelect, showVoteC
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-start justify-between gap-2 flex-wrap">
           <h3 className="font-semibold text-lg leading-tight">{candidate.name}</h3>
           {selected && <span className="text-blue-600 font-bold text-sm">✔ Selected</span>}
           {showVoteCount && (

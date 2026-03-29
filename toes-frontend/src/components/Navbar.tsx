@@ -14,23 +14,23 @@ export default function Navbar() {
 
   return (
     <nav className="bg-blue-700 text-white shadow">
-      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold tracking-tight">
+      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <Link to="/" className="text-xl font-bold tracking-tight shrink-0">
           🗳️ TOES
         </Link>
-        <div className="flex items-center gap-4 text-sm">
-          <Link to="/elections" className="hover:underline">Elections</Link>
+        <div className="flex items-center gap-3 text-sm min-w-0">
+          <Link to="/elections" className="hover:underline shrink-0">Elections</Link>
           {user ? (
             <>
-              <span className="opacity-75">Hi, {user.name}</span>
-              <button onClick={handleLogout} className="bg-white text-blue-700 px-3 py-1 rounded font-semibold hover:bg-blue-50">
+              <span className="opacity-75 truncate max-w-[100px] hidden sm:inline">Hi, {user.name}</span>
+              <button onClick={handleLogout} className="bg-white text-blue-700 px-3 py-1 rounded font-semibold hover:bg-blue-50 shrink-0">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:underline">Login</Link>
-              <Link to="/register" className="bg-white text-blue-700 px-3 py-1 rounded font-semibold hover:bg-blue-50">
+              <Link to="/login" className="hover:underline shrink-0">Login</Link>
+              <Link to="/register" className="bg-white text-blue-700 px-3 py-1 rounded font-semibold hover:bg-blue-50 shrink-0">
                 Register
               </Link>
             </>

@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { PageLayout } from '../components/Navbar'
 import CandidateCard from '../components/CandidateCard'
 import ChatBox from '../components/ChatBox'
+import QASection from '../components/QASection'
 
 interface Candidate {
   id: number
@@ -157,10 +158,15 @@ export default function ElectionDetailPage() {
 
       {/* LIVE CHAT */}
       {(isOpen || isClosed) && (
-        <div>
+        <div className="mb-8">
           <h2 className="text-lg font-semibold mb-3">Discussion</h2>
           <ChatBox electionId={election.id} />
         </div>
+      )}
+
+      {/* CANDIDATE Q&A */}
+      {(isOpen || isClosed) && candidates.length > 0 && (
+        <QASection candidates={candidates} />
       )}
     </PageLayout>
   )

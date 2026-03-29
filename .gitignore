@@ -1,0 +1,17 @@
+# Rails backend
+toes-backend/log/*.log
+toes-backend/tmp/
+toes-backend/storage/
+toes-backend/.env
+toes-backend/public/assets
+
+# Frontend
+toes-frontend/node_modules/
+toes-frontend/dist/
+toes-frontend/.env
+toes-frontend/.env.local
+
+# OS / editor
+.DS_Store
+*.swp
+.vscode/

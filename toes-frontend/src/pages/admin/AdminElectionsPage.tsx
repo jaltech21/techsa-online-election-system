@@ -109,16 +109,17 @@ export default function AdminElectionsPage() {
         ) : (
           <div className="space-y-3">
             {elections.map((e) => (
-              <div key={e.id} className="bg-white border rounded-xl p-4 flex items-center gap-4">
+              <div key={e.id} className="bg-white border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{e.title}</span>
                     {statusBadge(e.status)}
                   </div>
                 </div>
-                <div className="flex gap-2 text-sm">
+                <div className="flex flex-wrap gap-2 text-sm">
                   <Link to={`/admin/elections/${e.id}/keys`} className="border px-3 py-1 rounded-lg hover:bg-gray-50">Keys</Link>
                   <Link to={`/admin/elections/${e.id}/analytics`} className="border px-3 py-1 rounded-lg hover:bg-gray-50">Analytics</Link>
+                  <Link to={`/admin/elections/${e.id}/qa`} className="border px-3 py-1 rounded-lg hover:bg-gray-50">Q&amp;A</Link>
                   <button
                     onClick={() => toggle(e.id)}
                     className={`px-3 py-1 rounded-lg font-semibold ${
