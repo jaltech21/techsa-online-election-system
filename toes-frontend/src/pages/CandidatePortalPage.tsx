@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import api from '../lib/api'
 import { useAuth } from '../hooks/useAuth'
 import { PageLayout } from '../components/Navbar'
@@ -440,8 +440,17 @@ function QuestionsTab({ candidateId }: { candidateId: number }) {
 export default function CandidatePortalPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [tab, setTab] = useState<Tab>('overview')
+  const [searchParams] = useSearchParams()
+  const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) ?? 'overview')
   const [candidate, setCandidate] = useState<CandidateProfile | null>(null)
+
+  useEffect(() => {
+    setTab((searchParams.get('tab') as Tab) ?? 'overview')
+  }, [searchParams])
+
+  const switchTab = (t: Tab) => {
+    navigate(t === 'overview' ? '/candidate/portal' : `/candidate/portal?tab=${t}`, { replace: true })
+  }
   const [election, setElection] = useState<ElectionInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -525,7 +534,7 @@ export default function CandidatePortalPage() {
           {tabs.map(t => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => switchTab(t.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                 tab === t.id
                   ? 'bg-white text-indigo-700 shadow-sm'
