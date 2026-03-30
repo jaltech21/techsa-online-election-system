@@ -7,7 +7,9 @@ interface Candidate {
   position: string
   bio?: string
   manifesto?: string
+  video_url?: string
   photo_url?: string | null
+  answered_count?: number
 }
 
 interface Props {
@@ -94,8 +96,14 @@ export default function CandidateCard({ candidate, selected, onSelect, onOpen, s
               <button
                 onClick={(e) => { e.stopPropagation(); onOpen('qa') }}
                 className="text-[11px] font-semibold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition"
+                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
               >
                 Q&amp;A
+                {(candidate.answered_count ?? 0) > 0 && (
+                  <span className="bg-emerald-500 text-white text-[9px] font-extrabold rounded-full px-1.5 py-0.5 leading-none">
+                    {candidate.answered_count}
+                  </span>
+                )}
               </button>
             </div>
           )}
@@ -194,6 +202,11 @@ export default function CandidateCard({ candidate, selected, onSelect, onOpen, s
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Q&amp;A
+                {(candidate.answered_count ?? 0) > 0 && (
+                  <span className="bg-emerald-500 text-white text-[10px] font-extrabold rounded-full px-1.5 py-0.5 leading-none">
+                    {candidate.answered_count}
+                  </span>
+                )}
               </button>
             </div>
           )}

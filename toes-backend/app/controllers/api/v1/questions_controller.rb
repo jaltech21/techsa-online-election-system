@@ -5,13 +5,14 @@ module Api
 
       def index
         candidate = Candidate.find(params[:candidate_id])
-        questions = candidate.questions.order(created_at: :desc)
+        questions = candidate.questions.order(pinned: :desc, created_at: :desc)
         render json: questions.map { |q|
           {
             id: q.id,
             body: q.body,
             answered: q.answered,
             answer: q.answered ? q.answer : nil,
+            pinned: q.pinned || false,
             created_at: q.created_at
           }
         }
@@ -38,6 +39,15 @@ module Api
         else
           render json: { errors: question.errors.full_messages }, status: :unprocessable_entity
         end
+      end
+
+      def pin
+        authenticate_admin!
+        return if performed?
+
+        question = Question.find(params[:id])
+        question.update!(pinned: !question.pinned?)
+        render json: { id: question.id, pinned: question.pinned }
       end
     end
   end

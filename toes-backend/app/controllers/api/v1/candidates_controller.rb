@@ -5,7 +5,7 @@ module Api
 
       def index
         election = Election.find(params[:election_id])
-        candidates = election.candidates.includes(photo_attachment: :blob)
+        candidates = election.candidates.includes(:questions, photo_attachment: :blob)
         render json: candidates_json(candidates)
       end
 
@@ -44,7 +44,7 @@ module Api
       end
 
       def candidate_params
-        params.permit(:name, :position, :bio, :manifesto)
+        params.permit(:name, :position, :bio, :manifesto, :video_url)
       end
 
       def attach_photo(candidate)
@@ -62,8 +62,10 @@ module Api
           position: c.position,
           bio: c.bio,
           manifesto: c.manifesto,
+          video_url: c.video_url,
           election_id: c.election_id,
-          photo_url: c.photo.attached? ? url_for(c.photo) : nil
+          photo_url: c.photo.attached? ? url_for(c.photo) : nil,
+          answered_count: c.questions.count(&:answered)
         }
       end
     end

@@ -11,18 +11,19 @@ module Api
 
         candidate = election.candidates.find(params[:candidate_id])
 
+        vote = nil
         ActiveRecord::Base.transaction do
-          Vote.create!(voter: @current_user, candidate: candidate, election: election)
+          vote = Vote.create!(voter: @current_user, candidate: candidate, election: election)
           @current_user.update!(has_voted: true)
 
-          # Broadcast live analytics update to admin dashboard
+          # Broadcast live analytics update
           ActionCable.server.broadcast(
             "analytics_#{election.id}",
             { votes_cast: election.votes.count }
           )
         end
 
-        render json: { message: "Vote recorded successfully" }, status: :created
+        render json: { message: "Vote recorded successfully", reference: vote.reference }, status: :created
       rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
         render json: { error: "Could not record vote: #{e.message}" }, status: :unprocessable_entity
       end

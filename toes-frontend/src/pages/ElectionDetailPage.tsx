@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../lib/api'
 import { useAuth } from '../hooks/useAuth'
@@ -7,6 +7,7 @@ import CandidateCard from '../components/CandidateCard'
 import ChatBox from '../components/ChatBox'
 import CandidateDrawer from '../components/CandidateDrawer'
 import type { DrawerTab } from '../components/CandidateDrawer'
+import cable from '../lib/cable'
 
 interface Candidate {
   id: number
@@ -14,8 +15,10 @@ interface Candidate {
   position: string
   bio?: string
   manifesto?: string
+  video_url?: string
   photo_url?: string | null
   votes?: number
+  answered_count?: number
 }
 
 interface Election {
@@ -23,7 +26,77 @@ interface Election {
   title: string
   description?: string
   status: 'draft' | 'open' | 'closed'
+  ends_at?: string | null
   results?: Candidate[]
+}
+
+interface Turnout {
+  votes_cast: number
+  total_voters: number
+  turnout_percent: number
+}
+
+function CountdownTimer({ endsAt }: { endsAt: string }) {
+  const [remaining, setRemaining] = useState('')
+  useEffect(() => {
+    const tick = () => {
+      const diff = new Date(endsAt).getTime() - Date.now()
+      if (diff <= 0) { setRemaining('closing soon'); return }
+      const h = Math.floor(diff / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+      setRemaining(`${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`)
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [endsAt])
+  return <span className="font-mono font-bold text-emerald-700">{remaining}</span>
+}
+
+function generateShareCard() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 800
+  canvas.height = 500
+  const ctx = canvas.getContext('2d')!
+  const grad = ctx.createLinearGradient(0, 0, 800, 500)
+  grad.addColorStop(0, '#4f46e5')
+  grad.addColorStop(1, '#7c3aed')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, 800, 500)
+  // Circle glow
+  ctx.beginPath()
+  ctx.arc(400, 165, 75, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(255,255,255,0.12)'
+  ctx.fill()
+  ctx.fillStyle = '#ffffff'
+  ctx.textAlign = 'center'
+  ctx.font = 'bold 62px system-ui,sans-serif'
+  ctx.fillText('\u2713', 400, 195)
+  ctx.font = 'bold 54px system-ui,sans-serif'
+  ctx.fillText('I Voted!', 400, 295)
+  ctx.font = '28px system-ui,sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'
+  ctx.fillText('TECHSA Online Elections 2026', 400, 360)
+  ctx.font = '20px system-ui,sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'
+  ctx.fillText('Your voice has been heard. \ud83d\uddf3\ufe0f', 400, 410)
+  canvas.toBlob((blob) => {
+    if (!blob) return
+    const file = new File([blob], 'i-voted-techsa-2026.png', { type: 'image/png' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((navigator as any).canShare?.({ files: [file] })) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (navigator as any).share({ files: [file], title: 'I Voted – TECHSA 2026', text: 'I just voted in the TECHSA 2026 student election! \ud83d\uddf3\ufe0f' }).catch(() => {})
+    } else {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'i-voted-techsa-2026.png'
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }, 'image/png')
 }
 
 export default function ElectionDetailPage() {
@@ -39,16 +112,44 @@ export default function ElectionDetailPage() {
   const [chatOpen, setChatOpen] = useState(false)
   const [drawerCandidate, setDrawerCandidate] = useState<Candidate | null>(null)
   const [drawerTab, setDrawerTab] = useState<DrawerTab>('manifesto')
+  const [turnout, setTurnout] = useState<Turnout | null>(null)
+  const [receipt, setReceipt] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [posFilter, setPosFilter] = useState('All')
 
   const openDrawer = (candidate: Candidate, tab: DrawerTab) => {
     setDrawerCandidate(candidate)
     setDrawerTab(tab)
   }
 
+  const positions = useMemo(() => {
+    const unique = Array.from(new Set(candidates.map((c) => c.position)))
+    return ['All', ...unique]
+  }, [candidates])
+
+  const filteredCandidates = useMemo(() => candidates.filter((c) => {
+    const matchPos = posFilter === 'All' || c.position === posFilter
+    const matchSearch = search === '' || c.name.toLowerCase().includes(search.toLowerCase())
+    return matchPos && matchSearch
+  }), [candidates, posFilter, search])
+
   useEffect(() => {
     if (!id) return
     api.get(`/elections/${id}`).then((r) => setElection(r.data))
     api.get(`/elections/${id}/candidates`).then((r) => setCandidates(r.data))
+    api.get(`/elections/${id}/turnout`).then((r) => setTurnout(r.data)).catch(() => {})
+  }, [id])
+
+  // Live turnout via AnalyticsChannel
+  useEffect(() => {
+    if (!id) return
+    const sub = cable.subscriptions.create(
+      { channel: 'AnalyticsChannel', election_id: Number(id) },
+      { received: (data: { votes_cast: number }) => {
+        setTurnout((prev) => prev ? { ...prev, votes_cast: data.votes_cast, turnout_percent: prev.total_voters > 0 ? parseFloat((data.votes_cast / prev.total_voters * 100).toFixed(1)) : 0 } : prev)
+      }}
+    )
+    return () => { sub.unsubscribe() }
   }, [id])
 
   useEffect(() => {
@@ -60,11 +161,12 @@ export default function ElectionDetailPage() {
     setSubmitting(true)
     setError('')
     try {
-      await api.post(`/elections/${id}/votes`, { candidate_id: selected })
+      const voteResp = await api.post(`/elections/${id}/votes`, { candidate_id: selected })
+      setReceipt(voteResp.data.reference ?? null)
       setVoted(true)
       // Reload to show updated state
-      const r = await api.get(`/elections/${id}`)
-      setElection(r.data)
+      const electionResp = await api.get(`/elections/${id}`)
+      setElection(electionResp.data)
     } catch (err: any) {
       setError(err.response?.data?.error ?? 'Failed to submit vote.')
     } finally {
@@ -111,6 +213,21 @@ export default function ElectionDetailPage() {
           </div>
           <span className="text-4xl opacity-50 hidden sm:block">🗳️</span>
         </div>
+        {/* Live turnout bar */}
+        {isOpen && turnout && turnout.total_voters > 0 && (
+          <div className="mt-5">
+            <div style={{ display: 'flex', justifyContent: 'space-between' }} className="text-xs text-indigo-200 mb-1.5">
+              <span>🔥 Live Voter Turnout</span>
+              <span>{turnout.votes_cast} / {turnout.total_voters} students ({turnout.turnout_percent}%)</span>
+            </div>
+            <div className="h-2.5 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white/80 rounded-full transition-all duration-700"
+                style={{ width: `${Math.min(turnout.turnout_percent, 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* RESULTS VIEW (when closed) */}
@@ -150,7 +267,25 @@ export default function ElectionDetailPage() {
                 </svg>
               </div>
               <p className="font-extrabold text-emerald-700 text-lg">Vote Recorded!</p>
-              <p className="text-emerald-600 text-sm mt-1">Results will be published once the election closes.</p>
+              {receipt && (
+                <div className="mt-3 bg-white border border-emerald-200 rounded-xl px-4 py-2.5 inline-block">
+                  <p className="text-slate-400 text-[11px] font-medium mb-0.5">Transaction ID</p>
+                  <p className="font-mono font-bold text-slate-800 text-sm tracking-widest">{receipt}</p>
+                </div>
+              )}
+              {election.ends_at ? (
+                <p className="text-emerald-600 text-sm mt-3">
+                  Results live in: <CountdownTimer endsAt={election.ends_at} />
+                </p>
+              ) : (
+                <p className="text-emerald-600 text-sm mt-2">Results will be published once the election closes.</p>
+              )}
+              <button
+                onClick={generateShareCard}
+                className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition"
+              >
+                📸 Share "I Voted" Card
+              </button>
             </div>
           ) : !user ? (
             <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-8 text-center">
@@ -167,9 +302,36 @@ export default function ElectionDetailPage() {
             </div>
           ) : (
             <>
+              {/* Search + position filter */}
+              <div className="space-y-3 mb-5">
+                <input
+                  type="text"
+                  placeholder="Search candidates by name…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder:text-slate-400"
+                />
+                {positions.length > 2 && (
+                  <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+                    {positions.map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPosFilter(p)}
+                        className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition border ${
+                          posFilter === p
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               {/* Candidate grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {candidates.map((c) => (
+                {filteredCandidates.map((c) => (
                   <CandidateCard
                     key={c.id}
                     candidate={c}
@@ -178,6 +340,9 @@ export default function ElectionDetailPage() {
                     onOpen={(tab) => openDrawer(c, tab)}
                   />
                 ))}
+                {filteredCandidates.length === 0 && (
+                  <p className="text-slate-400 text-sm col-span-3 text-center py-8">No candidates match your search.</p>
+                )}
               </div>
               {error && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl px-4 py-3 mt-5">{error}</div>
@@ -202,8 +367,9 @@ export default function ElectionDetailPage() {
             <h2 className="text-xl font-extrabold text-slate-800">Candidates</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {candidates.map((c) => <CandidateCard key={c.id} candidate={c} onOpen={(tab) => openDrawer(c, tab)} />)}
+            {filteredCandidates.map((c) => <CandidateCard key={c.id} candidate={c} onOpen={(tab) => openDrawer(c, tab)} />)}
           </div>
+          {filteredCandidates.length === 0 && candidates.length > 0 && <p className="text-slate-400 text-center py-10">No matches.</p>}
           {candidates.length === 0 && <p className="text-slate-400 text-center py-10">No candidates registered yet.</p>}
         </div>
       )}

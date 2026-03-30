@@ -10,6 +10,7 @@ interface Candidate {
   position: string
   bio?: string
   manifesto?: string
+  video_url?: string
   photo_url?: string | null
 }
 
@@ -18,6 +19,7 @@ interface Question {
   body: string
   answered: boolean
   answer: string | null
+  pinned: boolean
   created_at: string
 }
 
@@ -122,6 +124,12 @@ function QATab({ candidate }: { candidate: Candidate }) {
                   </div>
                   <div className="flex-1">
                     <div className="bg-slate-100 rounded-2xl rounded-tl-sm px-4 py-3">
+                      {q.pinned && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="mb-1.5">
+                          <span className="text-[10px]">📌</span>
+                          <span className="text-amber-600 text-[10px] font-bold uppercase tracking-wide">Pinned</span>
+                        </div>
+                      )}
                       <p className="text-slate-700 text-[13px] leading-relaxed">{q.body}</p>
                     </div>
                     <p className="text-slate-400 text-[11px] mt-1 ml-1">{timeAgo(q.created_at)}</p>
@@ -202,7 +210,7 @@ function QATab({ candidate }: { candidate: Candidate }) {
 
 /* ── Manifesto tab content ────────────────────────────────── */
 function ManifestoTab({ candidate }: { candidate: Candidate }) {
-  if (!candidate.manifesto?.trim()) {
+  if (!candidate.manifesto?.trim() && !candidate.video_url?.trim()) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-16 px-8 text-center">
         <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -212,13 +220,49 @@ function ManifestoTab({ candidate }: { candidate: Candidate }) {
           </svg>
         </div>
         <p className="text-slate-500 font-semibold text-sm">No manifesto uploaded yet</p>
-        <p className="text-slate-400 text-xs mt-1">{candidate.name} hasn't shared their manifesto.</p>
+        <p className="text-slate-400 text-xs mt-1">{candidate.name} hasn't shared their manifesto or video.</p>
       </div>
     )
   }
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-5">
+      {/* Video clip */}
+      {candidate.video_url?.trim() && (() => {
+        const embedUrl = isYouTube(candidate.video_url!) ? videoEmbedUrl(candidate.video_url!) : null
+        return (
+          <div className="mb-6">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="mb-3">
+              <div className="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-slate-800 font-bold text-[13px]">Campaign Video</p>
+            </div>
+            {embedUrl ? (
+              <div className="rounded-2xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <iframe
+                  src={embedUrl}
+                  title={`${candidate.name} campaign video`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              </div>
+            ) : (
+              <video
+                src={candidate.video_url!}
+                controls
+                className="w-full rounded-2xl bg-black"
+                style={{ maxHeight: '240px' }}
+              />
+            )}
+          </div>
+        )
+      })()}
+
       {/* Manifesto header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="mb-5">
         <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -234,19 +278,30 @@ function ManifestoTab({ candidate }: { candidate: Candidate }) {
       </div>
 
       {/* Body */}
-      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5">
-        <p className="text-slate-700 text-sm leading-[1.8] whitespace-pre-wrap">{candidate.manifesto}</p>
-      </div>
-
-      {/* Word count */}
-      <p className="text-slate-400 text-[11px] mt-3 text-right">
-        {candidate.manifesto.split(/\s+/).filter(Boolean).length} words
-      </p>
+      {candidate.manifesto?.trim() && (
+        <>
+          <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5">
+            <p className="text-slate-700 text-sm leading-[1.8] whitespace-pre-wrap">{candidate.manifesto}</p>
+          </div>
+          <p className="text-slate-400 text-[11px] mt-3 text-right">
+            {candidate.manifesto!.split(/\s+/).filter(Boolean).length} words
+          </p>
+        </>
+      )}
     </div>
   )
 }
 
-/* ── Main drawer ──────────────────────────────────────────── */
+/* ── Video section (shown above manifesto text if video_url set) ─ */
+function isYouTube(url: string) {
+  return /youtu\.?be/.test(url)
+}
+
+function videoEmbedUrl(url: string) {
+  // Handle youtube.com/watch?v=ID and youtu.be/ID
+  const m = url.match(/(?:v=|youtu\.be\/)([\w-]{11})/)
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null
+}
 export default function CandidateDrawer({ candidate, initialTab = 'manifesto', onClose }: Props) {
   const [tab, setTab] = useState<DrawerTab>(initialTab)
 

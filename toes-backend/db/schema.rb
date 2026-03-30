@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_29_173802) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_30_022159) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_29_173802) do
     t.bigint "registration_key_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "video_url"
     t.index ["election_id"], name: "index_candidates_on_election_id"
     t.index ["registration_key_id"], name: "index_candidates_on_registration_key_id", unique: true
   end
@@ -103,6 +104,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_29_173802) do
     t.boolean "answered", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "pinned"
     t.index ["candidate_id"], name: "index_questions_on_candidate_id"
     t.index ["student_id"], name: "index_questions_on_student_id"
   end
@@ -135,6 +137,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_29_173802) do
     t.bigint "election_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "reference"
     t.index ["candidate_id"], name: "index_votes_on_candidate_id"
     t.index ["election_id"], name: "index_votes_on_election_id"
     t.index ["voter_id", "election_id"], name: "index_votes_on_voter_id_and_election_id", unique: true

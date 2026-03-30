@@ -4,4 +4,6 @@ class Question < ApplicationRecord
 
   validates :body, presence: true
   validates :student, :candidate, presence: true
+
+  scope :pinned_first, -> { order(pinned: :desc, created_at: :desc) }
 end

@@ -13,6 +13,9 @@ Rails.application.routes.draw do
 
       # Public elections listing
       resources :elections, only: [:index, :show] do
+        member do
+          get :turnout
+        end
         # Voting
         resources :votes, only: [:create]
         # Candidates within an election
@@ -34,6 +37,7 @@ Rails.application.routes.draw do
         resources :questions, only: [:index, :create]
       end
       patch "questions/:id/answer", to: "questions#answer", as: :answer_question
+      patch "questions/:id/pin",    to: "questions#pin",    as: :pin_question
 
       # Admin namespace
       namespace :admin do
