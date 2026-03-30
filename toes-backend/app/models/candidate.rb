@@ -1,6 +1,7 @@
 class Candidate < ApplicationRecord
   belongs_to :election
   belongs_to :registration_key
+  belongs_to :user, optional: true
 
   has_one_attached :photo
   has_many :votes, dependent: :destroy

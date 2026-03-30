@@ -24,10 +24,13 @@ Rails.application.routes.draw do
         resources :chat_messages, only: [:index, :create]
       end
 
-      # Candidate self-registration (with key)
-      post "candidates/register", to: "candidates#register"
+      # Candidate self-registration (with key) — must come before /candidates/:id
+      post "candidates/register",  to: "candidates#register"
+      # Candidate portal self-service (authenticated)
+      get  "candidates/me",        to: "candidates#me"
+      patch "candidates/me",       to: "candidates#update_me"
       # Individual candidate view
-      get  "candidates/:id",      to: "candidates#show", as: :candidate
+      get  "candidates/:id",       to: "candidates#show", as: :candidate
 
       # Announcements (public read)
       resources :announcements, only: [:index]
@@ -36,8 +39,9 @@ Rails.application.routes.draw do
       resources :candidates, only: [] do
         resources :questions, only: [:index, :create]
       end
-      patch "questions/:id/answer", to: "questions#answer", as: :answer_question
-      patch "questions/:id/pin",    to: "questions#pin",    as: :pin_question
+      patch "questions/:id/answer",        to: "questions#answer",            as: :answer_question
+      patch "questions/:id/pin",           to: "questions#pin",               as: :pin_question
+      patch "questions/:id/my_answer",     to: "questions#answer_as_candidate", as: :candidate_answer_question
 
       # Admin namespace
       namespace :admin do

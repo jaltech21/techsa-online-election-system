@@ -41,6 +41,20 @@ module Api
         end
       end
 
+      def answer_as_candidate
+        authenticate_user!
+        return if performed?
+
+        question = Question.find(params[:id])
+        return render json: { error: "Unauthorized" }, status: :forbidden unless question.candidate.user_id == @current_user.id
+
+        if question.update(answer: params[:answer], answered: true)
+          render json: { id: question.id, answered: question.answered, answer: question.answer }
+        else
+          render json: { errors: question.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       def pin
         authenticate_admin!
         return if performed?

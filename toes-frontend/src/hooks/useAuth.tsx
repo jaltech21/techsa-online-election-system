@@ -7,6 +7,7 @@ interface User {
   student_id: string
   name: string
   has_voted: boolean
+  candidate_id?: number | null
 }
 
 interface AuthContextType {

@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage'
 import ElectionsPage from './pages/ElectionsPage'
 import ElectionDetailPage from './pages/ElectionDetailPage'
 import CandidateRegisterPage from './pages/CandidateRegisterPage'
+import CandidatePortalPage from './pages/CandidatePortalPage'
 
 import LandingPage from './pages/LandingPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
@@ -30,7 +31,8 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:id" element={<ElectionDetailPage />} />
-            <Route path="/candidates/register" element={<CandidateRegisterPage />} />
+            <Route path="/candidates/register" element={<RequireAuth><CandidateRegisterPage /></RequireAuth>} />
+            <Route path="/candidate/portal" element={<RequireAuth><CandidatePortalPage /></RequireAuth>} />
 
             {/* Auth */}
             <Route path="/login" element={<RequireGuest><LoginPage /></RequireGuest>} />

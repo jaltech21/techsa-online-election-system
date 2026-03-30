@@ -1,7 +1,7 @@
 module Api
   module V1
     class CandidatesController < BaseController
-      before_action :authenticate_user!, only: []
+      before_action :authenticate_user!, only: [:register, :me, :update_me]
 
       def index
         election = Election.find(params[:election_id])
@@ -14,6 +14,8 @@ module Api
       end
 
       def register
+        return render json: { error: "You are already registered as a candidate" }, status: :unprocessable_entity if @current_user.candidate.present?
+
         key = RegistrationKey.find_by(token: params[:token])
 
         return render json: { error: "Invalid registration key" }, status: :unauthorized unless key
@@ -24,6 +26,7 @@ module Api
 
         candidate = election.candidates.build(candidate_params)
         candidate.registration_key = key
+        candidate.user = @current_user
 
         ActiveRecord::Base.transaction do
           candidate.save!
@@ -37,6 +40,27 @@ module Api
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
       end
 
+      def me
+        c = @current_user.candidate
+        return render json: { error: "Not registered as a candidate" }, status: :not_found unless c
+
+        render json: candidate_json(c)
+      end
+
+      def update_me
+        c = @current_user.candidate
+        return render json: { error: "Not registered as a candidate" }, status: :not_found unless c
+
+        ActiveRecord::Base.transaction do
+          c.update!(update_candidate_params)
+          attach_photo(c) if params[:photo].present?
+        end
+
+        render json: candidate_json(c)
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+      end
+
       private
 
       def candidate
@@ -45,6 +69,10 @@ module Api
 
       def candidate_params
         params.permit(:name, :position, :bio, :manifesto, :video_url)
+      end
+
+      def update_candidate_params
+        params.permit(:bio, :manifesto, :video_url)
       end
 
       def attach_photo(candidate)
@@ -65,7 +93,8 @@ module Api
           video_url: c.video_url,
           election_id: c.election_id,
           photo_url: c.photo.attached? ? url_for(c.photo) : nil,
-          answered_count: c.questions.count(&:answered)
+          answered_count: c.questions.count(&:answered),
+          pending_questions: c.questions.where(answered: false).count
         }
       end
     end

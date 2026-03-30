@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_30_022159) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_30_103441) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,8 +71,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_30_022159) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "video_url"
+    t.bigint "user_id"
     t.index ["election_id"], name: "index_candidates_on_election_id"
     t.index ["registration_key_id"], name: "index_candidates_on_registration_key_id", unique: true
+    t.index ["user_id"], name: "index_candidates_on_user_id"
   end
 
   create_table "chat_messages", force: :cascade do |t|
@@ -104,7 +106,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_30_022159) do
     t.boolean "answered", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "pinned"
+    t.boolean "pinned", default: false
     t.index ["candidate_id"], name: "index_questions_on_candidate_id"
     t.index ["student_id"], name: "index_questions_on_student_id"
   end
@@ -149,6 +151,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_30_022159) do
   add_foreign_key "announcements", "elections"
   add_foreign_key "candidates", "elections"
   add_foreign_key "candidates", "registration_keys"
+  add_foreign_key "candidates", "users"
   add_foreign_key "chat_messages", "elections"
   add_foreign_key "questions", "candidates"
   add_foreign_key "questions", "users", column: "student_id"
