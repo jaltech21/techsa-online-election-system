@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function LoginPage() {
   const { login, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = (location.state as any)?.from?.pathname ?? '/elections'
   const [form, setForm] = useState({ student_id: '', password: '' })
   const [error, setError] = useState('')
 
@@ -13,7 +15,7 @@ export default function LoginPage() {
     setError('')
     try {
       await login(form.student_id, form.password)
-      navigate('/elections')
+      navigate(from, { replace: true })
     } catch {
       setError('Invalid student ID or password.')
     }
