@@ -11,6 +11,7 @@ import ElectionsPage from './pages/ElectionsPage'
 import ElectionDetailPage from './pages/ElectionDetailPage'
 import CandidateRegisterPage from './pages/CandidateRegisterPage'
 
+import LandingPage from './pages/LandingPage'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminElectionsPage from './pages/admin/AdminElectionsPage'
 import AdminKeysPage from './pages/admin/AdminKeysPage'
@@ -25,7 +26,7 @@ export default function App() {
         <AdminAuthProvider>
           <Routes>
             {/* Public */}
-            <Route path="/" element={<Navigate to="/elections" replace />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:id" element={<ElectionDetailPage />} />
             <Route path="/candidates/register" element={<CandidateRegisterPage />} />
