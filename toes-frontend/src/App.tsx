@@ -31,7 +31,7 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:id" element={<ElectionDetailPage />} />
-            <Route path="/candidates/register" element={<RequireAuth><CandidateRegisterPage /></RequireAuth>} />
+            <Route path="/candidates/register" element={<CandidateRegisterPage />} />
             <Route path="/candidate/portal" element={<RequireAuth><CandidatePortalPage /></RequireAuth>} />
 
             {/* Auth */}

@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function RegisterPage() {
   const { register, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = (location.state as any)?.from?.pathname ?? '/elections'
   const [form, setForm] = useState({
     student_id: '', name: '', email: '', password: '', password_confirmation: '',
   })
@@ -19,7 +21,7 @@ export default function RegisterPage() {
     }
     try {
       await register(form)
-      navigate('/elections')
+      navigate(from, { replace: true })
     } catch (err: any) {
       const msgs = err.response?.data?.errors
       setError(msgs ? msgs.join(', ') : 'Registration failed.')
