@@ -26,6 +26,9 @@ Rails.application.routes.draw do
       # Individual candidate view
       get  "candidates/:id",      to: "candidates#show", as: :candidate
 
+      # Announcements (public read)
+      resources :announcements, only: [:index]
+
       # Q&A
       resources :candidates, only: [] do
         resources :questions, only: [:index, :create]
@@ -47,6 +50,9 @@ Rails.application.routes.draw do
             end
           end
         end
+
+        # Announcements (admin write)
+        resources :announcements, only: [:index, :create, :destroy]
       end
     end
   end

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import NotificationBell from './NotificationBell'
 
 /* ── Icons ───────────────────────────────────────────────── */
 const IcBallot = () => (
@@ -199,7 +200,10 @@ export function PageLayout({ children }: { children: ReactNode }) {
               <span className="font-semibold text-slate-700">{crumb}</span>
             </div>
           </div>
-          <TopBarUser />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <NotificationBell />
+            <TopBarUser />
+          </div>
         </header>
 
         <main className="flex-1 p-5 lg:p-7 max-w-6xl w-full mx-auto">

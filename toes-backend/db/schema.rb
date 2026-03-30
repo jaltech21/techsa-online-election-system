@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_27_171206) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_29_173802) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -48,6 +48,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_27_171206) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["username"], name: "index_admin_users_on_username", unique: true
+  end
+
+  create_table "announcements", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "body", null: false
+    t.bigint "election_id"
+    t.integer "admin_user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_announcements_on_created_at"
+    t.index ["election_id"], name: "index_announcements_on_election_id"
   end
 
   create_table "candidates", force: :cascade do |t|
@@ -132,6 +143,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_27_171206) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "announcements", "elections"
   add_foreign_key "candidates", "elections"
   add_foreign_key "candidates", "registration_keys"
   add_foreign_key "chat_messages", "elections"
