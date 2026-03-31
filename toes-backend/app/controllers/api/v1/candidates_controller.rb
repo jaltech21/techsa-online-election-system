@@ -13,6 +13,20 @@ module Api
         render json: candidate_json(candidate)
       end
 
+      def verify_key
+        key = RegistrationKey.find_by(token: params[:token])
+        return render json: { error: "Invalid registration key" }, status: :not_found unless key
+        return render json: { error: "Registration key already used" }, status: :unprocessable_entity if key.used?
+
+        election = key.election
+        render json: {
+          valid: true,
+          election_id: election.id,
+          election_title: election.title,
+          election_status: election.status
+        }
+      end
+
       def register
         return render json: { error: "You are already registered as a candidate" }, status: :unprocessable_entity if @current_user.candidate.present?
 

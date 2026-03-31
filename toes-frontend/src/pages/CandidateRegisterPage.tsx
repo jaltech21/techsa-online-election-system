@@ -245,6 +245,7 @@ export default function CandidateRegisterPage() {
   const [step, setStep] = useState<Step>('key')
   const [done, setDone] = useState(false)
   const [token, setToken] = useState('')
+  const [keyInfo, setKeyInfo] = useState<{ election_title: string; election_id: number } | null>(null)
   const [form, setForm] = useState({ name: '', position: '', bio: '', manifesto: '', video_url: '' })
   const [photo, setPhoto] = useState<File | null>(null)
   const [error, setError] = useState('')
@@ -255,6 +256,20 @@ export default function CandidateRegisterPage() {
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
+
+  const verifyKey = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await api.get(`/candidates/verify_key?token=${encodeURIComponent(token)}`)
+      setKeyInfo({ election_title: res.data.election_title, election_id: res.data.election_id })
+      setStep('identity')
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Invalid or already-used registration key.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const submitRegistration = async () => {
     setLoading(true)
@@ -317,6 +332,13 @@ export default function CandidateRegisterPage() {
 
         <StepBar current={step} />
 
+        {keyInfo && step !== 'key' && (
+          <div className="flex items-center gap-2.5 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-xl px-4 py-3 mb-4 text-sm font-medium">
+            <svg className="w-4 h-4 shrink-0 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Registering for: <span className="font-bold">{keyInfo.election_title}</span>
+          </div>
+        )}
+
         {error && (
           <div className="flex items-start gap-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl px-4 py-3 mb-6 text-sm">
             <svg className="w-4 h-4 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -339,17 +361,18 @@ export default function CandidateRegisterPage() {
               <input
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-mono text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent placeholder:text-slate-400 tracking-widest"
                 value={token}
-                onChange={(e) => setToken(e.target.value.trim())}
+                onChange={(e) => { setToken(e.target.value.trim()); setKeyInfo(null) }}
                 placeholder="TOES-XXXXXXXX-XXXX"
                 autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter' && token && !loading) verifyKey() }}
               />
             </div>
             <button
-              onClick={() => { setError(''); setStep('identity') }}
-              disabled={!token}
+              onClick={verifyKey}
+              disabled={!token || loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white py-3 rounded-xl font-semibold text-sm transition"
             >
-              Verify & Continue →
+              {loading ? 'Verifying…' : 'Verify & Continue →'}
             </button>
           </div>
         )}

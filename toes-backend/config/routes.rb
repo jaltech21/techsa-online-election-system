@@ -25,6 +25,7 @@ Rails.application.routes.draw do
       end
 
       # Candidate self-registration (with key) — must come before /candidates/:id
+      get  "candidates/verify_key", to: "candidates#verify_key"
       post "candidates/register",  to: "candidates#register"
       # Candidate portal self-service (authenticated)
       get  "candidates/me",        to: "candidates#me"
