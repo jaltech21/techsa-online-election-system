@@ -129,12 +129,12 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Student ID</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Student ID <span className="text-rose-500">*</span></label>
               <input className={inputCls} placeholder="e.g. 22/cs/tec/094" value={form.student_id}
                 onChange={e => setForm(f => ({ ...f, student_id: e.target.value }))} required />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Full Name</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Full Name <span className="text-rose-500">*</span></label>
               <input className={inputCls} placeholder="e.g. Amara Koroma" value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
             </div>
@@ -154,12 +154,12 @@ export default function RegisterPage() {
               {emailError && <p className="text-rose-600 text-xs mt-1">{emailError}</p>}
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password <span className="text-rose-500">*</span></label>
               <input type="password" className={inputCls} placeholder="Min 6 characters" value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Confirm Password</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Confirm Password <span className="text-rose-500">*</span></label>
               <input type="password" className={inputCls} placeholder="Repeat password" value={form.password_confirmation}
                 onChange={e => setForm(f => ({ ...f, password_confirmation: e.target.value }))} required />
             </div>

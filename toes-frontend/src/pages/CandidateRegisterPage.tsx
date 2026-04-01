@@ -178,7 +178,7 @@ function AuthGate() {
         {mode === 'register' && (
           <form onSubmit={handleRegister} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Student ID</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Student ID <span className="text-rose-500">*</span></label>
               <input
                 className={inputCls}
                 placeholder="e.g. 22/cs/tec/094"
@@ -189,7 +189,7 @@ function AuthGate() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Full Name</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Full Name <span className="text-rose-500">*</span></label>
               <input
                 className={inputCls}
                 placeholder="e.g. Amara Koroma"
@@ -214,7 +214,7 @@ function AuthGate() {
               {emailError && <p className="text-rose-600 text-xs mt-1">{emailError}</p>}
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password <span className="text-rose-500">*</span></label>
               <input
                 type="password"
                 className={inputCls}
@@ -225,7 +225,7 @@ function AuthGate() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Confirm Password</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Confirm Password <span className="text-rose-500">*</span></label>
               <input
                 type="password"
                 className={inputCls}
