@@ -5,6 +5,7 @@ import { useAdminAuth } from '../../hooks/useAdminAuth'
 const NAV = [
   { label: 'Dashboard',      icon: '📊', to: '/admin/dashboard', exact: true },
   { label: 'Elections',      icon: '🗳️', to: '/admin/elections' },
+  { label: 'Voter Keys',     icon: '🔑', to: '/admin/voter-keys' },
   { label: 'Announcements',  icon: '📢', to: '/admin/announcements' },
 ]
 

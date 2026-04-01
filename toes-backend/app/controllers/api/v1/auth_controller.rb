@@ -17,8 +17,13 @@ module Api
       end
 
       def register
-        user = User.new(student_params)
+        voter_key = VoterKey.find_by(token: params[:voter_key])
+        return render json: { error: "A valid voter key is required to register" }, status: :unprocessable_entity unless voter_key
+        return render json: { error: "Voter key already used" }, status: :unprocessable_entity if voter_key.used?
+
+        user = User.new(student_params.merge(verified: true))
         if user.save
+          voter_key.claim!(user)
           token = encode_token({ user_id: user.id })
           render json: { token: token, user: user_json(user) },
                  status: :created
@@ -41,6 +46,7 @@ module Api
           student_id: user.student_id,
           name: user.name,
           has_voted: user.has_voted,
+          verified: user.verified,
           candidate_id: user.candidate&.id
         }
       end

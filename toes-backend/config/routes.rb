@@ -24,6 +24,9 @@ Rails.application.routes.draw do
         resources :chat_messages, only: [:index, :create]
       end
 
+      # Voter key verification (public)
+      get "voter_keys/verify", to: "voter_keys#verify"
+
       # Candidate self-registration (with key) — must come before /candidates/:id
       get  "candidates/verify_key", to: "candidates#verify_key"
       post "candidates/register",  to: "candidates#register"
@@ -64,6 +67,13 @@ Rails.application.routes.draw do
 
         # Announcements (admin write)
         resources :announcements, only: [:index, :create, :destroy]
+
+        # Voter keys (admin manage)
+        resources :voter_keys, only: [:index] do
+          collection do
+            post :generate
+          end
+        end
       end
     end
   end

@@ -7,6 +7,7 @@ module Api
         election = Election.find(params[:election_id])
 
         return render json: { error: "Election is not open" }, status: :forbidden unless election.open?
+        return render json: { error: "Your account is not verified as an eligible voter. Please use the voter key provided by an administrator when registering." }, status: :forbidden unless @current_user.verified?
         return render json: { error: "You have already voted in this election" }, status: :unprocessable_entity if @current_user.has_voted?
 
         candidate = election.candidates.find(params[:candidate_id])

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_30_103441) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_01_202800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -130,7 +130,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_30_103441) do
     t.boolean "has_voted", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "verified", default: false, null: false
     t.index ["student_id"], name: "index_users_on_student_id", unique: true
+  end
+
+  create_table "voter_keys", force: :cascade do |t|
+    t.string "token", null: false
+    t.boolean "used", default: false, null: false
+    t.bigint "user_id"
+    t.string "membership_ref"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_voter_keys_on_token", unique: true
+    t.index ["user_id"], name: "index_voter_keys_on_user_id"
   end
 
   create_table "votes", force: :cascade do |t|
