@@ -203,6 +203,17 @@ export default function ElectionDetailPage() {
 
   return (
     <PageLayout>
+      {/* Back navigation */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-indigo-600 font-medium mb-5 transition group"
+      >
+        <svg className="w-4 h-4 transition group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Elections
+      </button>
+
       {/* Election header */}
       <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-2xl p-7 mb-8 text-white shadow-lg">
         <div className="flex items-start justify-between gap-4">

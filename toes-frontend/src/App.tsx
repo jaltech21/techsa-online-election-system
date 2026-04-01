@@ -29,7 +29,7 @@ export default function App() {
         <AdminAuthProvider>
           <Routes>
             {/* Public */}
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<Navigate to="/elections" replace />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:id" element={<ElectionDetailPage />} />
             <Route path="/candidates/register" element={<CandidateRegisterPage />} />

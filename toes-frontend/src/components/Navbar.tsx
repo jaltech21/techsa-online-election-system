@@ -136,7 +136,6 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         ) : (
           <>
             <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.12em] px-3 pb-2 pt-1">Navigation</p>
-            <NavLink to="/" icon={<IcHome />} label="Dashboard" exact onClick={onClose} />
             <NavLink to="/elections" icon={<IcBallot />} label="Elections" onClick={onClose} />
           </>
         )}
@@ -190,15 +189,24 @@ export function PageLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { pathname } = useLocation()
 
-  // Derive breadcrumb from path
-  const crumb = pathname === '/' ? 'Dashboard'
-    : pathname.startsWith('/elections/') ? 'Election Detail'
-    : pathname.startsWith('/elections') ? 'Elections'
-    : pathname.startsWith('/candidate/portal') ? 'My Campaign'
-    : pathname.startsWith('/candidates/register') ? 'Candidate Registration'
-    : pathname.startsWith('/login') ? 'Login'
-    : pathname.startsWith('/register') ? 'Register'
-    : 'Page'
+  // Derive breadcrumb segments for display in the top bar
+  const breadcrumbs: { label: string; to?: string }[] =
+    pathname.startsWith('/elections/') ? [
+      { label: 'Elections', to: '/elections' },
+      { label: 'Election Detail' },
+    ] :
+    pathname.startsWith('/elections') ? [
+      { label: 'Elections' },
+    ] :
+    pathname.startsWith('/candidate/portal') ? [
+      { label: 'My Campaign' },
+    ] :
+    pathname.startsWith('/candidates/register') ? [
+      { label: 'Candidate Registration' },
+    ] :
+    pathname.startsWith('/login') ? [{ label: 'Login' }] :
+    pathname.startsWith('/register') ? [{ label: 'Register' }] :
+    [{ label: 'Home' }]
 
   return (
     <div className="min-h-screen flex bg-slate-100">
@@ -231,10 +239,18 @@ export function PageLayout({ children }: { children: ReactNode }) {
               <IcMenu />
             </button>
             {/* Breadcrumb */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} className="text-sm">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="text-sm">
               <span className="text-slate-400 font-medium hidden sm:block">TECHSA</span>
-              <span className="text-slate-300 hidden sm:block"><IcChevron /></span>
-              <span className="font-semibold text-slate-700">{crumb}</span>
+              {breadcrumbs.map((seg, i) => (
+                <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span className="text-slate-300 hidden sm:block"><IcChevron /></span>
+                  {seg.to ? (
+                    <Link to={seg.to} className="text-slate-500 hover:text-indigo-600 font-medium transition hidden sm:block">{seg.label}</Link>
+                  ) : (
+                    <span className="font-semibold text-slate-700">{seg.label}</span>
+                  )}
+                </span>
+              ))}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
