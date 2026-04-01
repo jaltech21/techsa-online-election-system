@@ -58,6 +58,14 @@ function AuthGate() {
   const [regForm, setRegForm] = useState({ student_id: '', name: '', email: '', password: '', password_confirmation: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [emailError, setEmailError] = useState('')
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const validateEmail = (v: string) => {
+    if (!v) { setEmailError('Email is required.'); return false }
+    if (!EMAIL_RE.test(v)) { setEmailError('Must be a valid email address.'); return false }
+    setEmailError(''); return true
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,6 +87,7 @@ function AuthGate() {
       setError('Passwords do not match.')
       return
     }
+    if (!validateEmail(regForm.email)) return
     setLoading(true)
     try {
       await register(regForm)
@@ -190,14 +199,19 @@ function AuthGate() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email (optional)</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                Email <span className="text-rose-500">*</span>
+              </label>
               <input
                 type="email"
-                className={inputCls}
+                className={`${inputCls} ${emailError ? 'border-rose-400 bg-rose-50' : ''}`}
                 placeholder="student@umt.edu"
                 value={regForm.email}
-                onChange={e => setRegForm(f => ({ ...f, email: e.target.value }))}
+                onChange={e => { setRegForm(f => ({ ...f, email: e.target.value })); if (emailError) validateEmail(e.target.value) }}
+                onBlur={e => validateEmail(e.target.value)}
+                required
               />
+              {emailError && <p className="text-rose-600 text-xs mt-1">{emailError}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>

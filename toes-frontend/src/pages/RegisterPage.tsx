@@ -16,7 +16,15 @@ export default function RegisterPage() {
   const [voterKey, setVoterKey] = useState('')
   const [keyState, setKeyState] = useState<KeyState>('idle')
   const [keyError, setKeyError] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [error, setError] = useState('')
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const validateEmail = (v: string) => {
+    if (!v) { setEmailError('Email is required.'); return false }
+    if (!EMAIL_RE.test(v)) { setEmailError('Must be a valid email address.'); return false }
+    setEmailError(''); return true
+  }
 
   const verifyKey = async (token: string) => {
     if (!token.trim()) { setKeyState('idle'); setKeyError(''); return }
@@ -38,6 +46,7 @@ export default function RegisterPage() {
       setError('Please enter a valid voter key before registering.')
       return
     }
+    if (!validateEmail(form.email)) return
     if (form.password !== form.password_confirmation) {
       setError('Passwords do not match.')
       return
@@ -130,9 +139,19 @@ export default function RegisterPage() {
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email (optional)</label>
-              <input type="email" className={inputCls} placeholder="student@umt.edu" value={form.email}
-                onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                Email <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="email"
+                className={`${inputCls} ${emailError ? 'border-rose-400 bg-rose-50' : ''}`}
+                placeholder="student@umt.edu"
+                value={form.email}
+                onChange={e => { setForm(f => ({ ...f, email: e.target.value })); if (emailError) validateEmail(e.target.value) }}
+                onBlur={e => validateEmail(e.target.value)}
+                required
+              />
+              {emailError && <p className="text-rose-600 text-xs mt-1">{emailError}</p>}
             </div>
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
