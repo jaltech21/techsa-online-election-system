@@ -74,7 +74,7 @@ export default function RegisterPage() {
 
       <div className="relative w-full max-w-md">
         {/* Back to home */}
-        <Link to="/" className="inline-flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium mb-6 transition group">
+        <Link to="/home" className="inline-flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium mb-6 transition group">
           <svg className="w-4 h-4 transition group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -83,7 +83,7 @@ export default function RegisterPage() {
 
         {/* Brand */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex flex-col items-center gap-1 group">
+          <Link to="/home" className="inline-flex flex-col items-center gap-1 group">
             <span className="inline-flex items-center gap-2.5 text-white font-extrabold text-3xl tracking-tight">
               <span className="w-11 h-11 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-2xl shadow-lg group-hover:bg-white/30 transition">🗳️</span>
               TOES

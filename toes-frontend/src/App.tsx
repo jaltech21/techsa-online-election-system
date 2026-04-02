@@ -30,6 +30,7 @@ export default function App() {
           <Routes>
             {/* Public */}
             <Route path="/" element={<Navigate to="/elections" replace />} />
+            <Route path="/home" element={<LandingPage />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:id" element={<ElectionDetailPage />} />
             <Route path="/candidates/register" element={<CandidateRegisterPage />} />
