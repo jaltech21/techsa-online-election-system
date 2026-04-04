@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { PageLayout } from '../components/Navbar'
 import CandidateCard from '../components/CandidateCard'
 import ChatBox from '../components/ChatBox'
+import QASection from '../components/QASection'
 import CandidateDrawer from '../components/CandidateDrawer'
 import type { DrawerTab } from '../components/CandidateDrawer'
 import cable from '../lib/cable'
@@ -392,6 +393,13 @@ export default function ElectionDetailPage() {
           </div>
           {filteredCandidates.length === 0 && candidates.length > 0 && <p className="text-slate-400 text-center py-10">No matches.</p>}
           {candidates.length === 0 && <p className="text-slate-400 text-center py-10">No candidates registered yet.</p>}
+        </div>
+      )}
+
+      {/* Q&A SECTION */}
+      {candidates.length > 0 && (
+        <div className="mb-10">
+          <QASection candidates={candidates} />
         </div>
       )}
 

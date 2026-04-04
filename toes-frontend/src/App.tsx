@@ -20,6 +20,7 @@ import AdminKeysPage from './pages/admin/AdminKeysPage'
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage'
 import AdminQAPage from './pages/admin/AdminQAPage'
 import AdminVoterKeysPage from './pages/admin/AdminVoterKeysPage'
+import AdminAnnouncementsPage from './pages/admin/AdminAnnouncementsPage'
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/admin/elections/:id/analytics" element={<RequireAdmin><AdminAnalyticsPage /></RequireAdmin>} />
             <Route path="/admin/elections/:id/qa" element={<RequireAdmin><AdminQAPage /></RequireAdmin>} />
             <Route path="/admin/voter-keys" element={<RequireAdmin><AdminVoterKeysPage /></RequireAdmin>} />
+            <Route path="/admin/announcements" element={<RequireAdmin><AdminAnnouncementsPage /></RequireAdmin>} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/elections" replace />} />
