@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "mobile:sync": "npm run build && npx cap sync",
+    "mobile:ios": "npm run build && npx cap sync && npx cap open ios",
+    "mobile:android": "npm run build && npx cap sync && npx cap open android"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
@@ -22,6 +25,10 @@
     "vite": "^8.0.1"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^7.6.1",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/ios": "^8.3.0",
     "@rails/actioncable": "^8.1.300",
     "axios": "^1.13.6",
     "react": "^19.2.4",

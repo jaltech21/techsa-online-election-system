@@ -1,8 +1,12 @@
 import axios from 'axios'
 
-const api = axios.create({
-  baseURL: '/api/v1',
-})
+// In a Capacitor WebView there is no dev-server proxy, so we need an absolute
+// URL. VITE_API_BASE_URL must be set when building for mobile (e.g. https://api.techsa.com).
+const baseURL = import.meta.env.VITE_API_BASE_URL
+  ? `${import.meta.env.VITE_API_BASE_URL}/api/v1`
+  : '/api/v1'
+
+const api = axios.create({ baseURL })
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')

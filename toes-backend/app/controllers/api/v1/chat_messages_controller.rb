@@ -18,9 +18,18 @@ module Api
 
       def create
         election = Election.find(params[:election_id])
+        raw_body = params[:body].to_s.strip
+
+        if raw_body.blank?
+          return render json: { error: 'Message cannot be blank.' }, status: :unprocessable_entity
+        end
+
+        if raw_body.length > 500
+          return render json: { error: 'Message is too long (max 500 characters).' }, status: :unprocessable_entity
+        end
 
         msg = election.chat_messages.build(
-          body: params[:body],
+          body: raw_body,
           user: @current_user
         )
 
