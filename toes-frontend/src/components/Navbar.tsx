@@ -99,7 +99,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
   const handleLogout = () => {
     logout()
-    navigate('/login')
+    navigate('/home')
     onClose?.()
   }
 
@@ -291,7 +291,7 @@ function TopBarUser() {
       </div>
       <Avatar name={user.name} size="sm" />
       <button
-        onClick={() => { logout(); navigate('/login') }}
+        onClick={() => { logout(); navigate('/home') }}
         className="text-xs text-slate-400 hover:text-rose-500 font-medium transition hidden sm:block"
       >
         Sign out
