@@ -30,8 +30,8 @@ export default function App() {
         <AdminAuthProvider>
           <Routes>
             {/* Public */}
-            <Route path="/" element={<Navigate to="/elections" replace />} />
-            <Route path="/home" element={<LandingPage />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/elections" element={<ElectionsPage />} />
             <Route path="/elections/:id" element={<ElectionDetailPage />} />
             <Route path="/candidates/register" element={<CandidateRegisterPage />} />
@@ -52,7 +52,7 @@ export default function App() {
             <Route path="/admin/announcements" element={<RequireAdmin><AdminAnnouncementsPage /></RequireAdmin>} />
 
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/elections" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AdminAuthProvider>
       </AuthProvider>
