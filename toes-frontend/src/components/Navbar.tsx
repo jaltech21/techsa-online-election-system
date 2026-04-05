@@ -154,6 +154,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                 <p className="text-slate-500 text-[11px] truncate mt-0.5">{(user as any).student_id ?? 'Student'}</p>
               </div>
             </div>
+            <NavLink to="/profile" icon={<IcProfile />} label="My Account" onClick={onClose} />
             <button
               onClick={handleLogout}
               style={{ display: 'flex', alignItems: 'center', gap: '10px' }}

@@ -38,6 +38,32 @@ module Api
         render json: user_json(@current_user)
       end
 
+      def update_profile
+        authenticate_user!
+        return if performed?
+
+        if @current_user.update(profile_params)
+          render json: user_json(@current_user)
+        else
+          render json: { errors: @current_user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      def update_password
+        authenticate_user!
+        return if performed?
+
+        unless @current_user.authenticate(params[:current_password].to_s)
+          return render json: { error: 'Current password is incorrect.' }, status: :unprocessable_entity
+        end
+
+        if @current_user.update(password: params[:password], password_confirmation: params[:password_confirmation])
+          render json: { message: 'Password updated successfully.' }
+        else
+          render json: { errors: @current_user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def user_json(user)
@@ -45,6 +71,7 @@ module Api
           id: user.id,
           student_id: user.student_id,
           name: user.name,
+          email: user.email,
           has_voted: user.has_voted,
           verified: user.verified,
           candidate_id: user.candidate&.id
@@ -52,7 +79,11 @@ module Api
       end
 
       def student_params
-        params.permit(:student_id, :name, :email, :password, :password_confirmation)
+        params.permit(:student_id, :name, :email, :password, :password_confirmation, :voter_key)
+      end
+
+      def profile_params
+        params.permit(:name, :email)
       end
     end
   end

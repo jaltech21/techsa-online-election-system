@@ -7,9 +7,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       # Student auth
-      post "auth/login",    to: "auth#login"
-      post "auth/register", to: "auth#register"
-      get  "auth/me",       to: "auth#me"
+      post  "auth/login",    to: "auth#login"
+      post  "auth/register", to: "auth#register"
+      get   "auth/me",       to: "auth#me"
+      patch "auth/profile",  to: "auth#update_profile"
+      patch "auth/password", to: "auth#update_password"
 
       # Public elections listing
       resources :elections, only: [:index, :show] do
