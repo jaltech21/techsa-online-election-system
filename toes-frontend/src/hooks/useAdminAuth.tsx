@@ -2,7 +2,10 @@ import React, { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
 import axios from 'axios'
 
-const adminApi = axios.create({ baseURL: '/api/v1/admin' })
+const _adminBase = import.meta.env.VITE_API_BASE_URL
+  ? `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin`
+  : '/api/v1/admin'
+const adminApi = axios.create({ baseURL: _adminBase })
 
 interface AdminUser { id: number; username: string }
 interface AdminAuthCtx {

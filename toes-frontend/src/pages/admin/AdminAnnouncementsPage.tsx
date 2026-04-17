@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import AdminShell from '../../components/admin/AdminShell'
 
-const adminApi = axios.create({ baseURL: '/api/v1' })
+const adminApi = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL
+    ? `${import.meta.env.VITE_API_BASE_URL}/api/v1`
+    : '/api/v1',
+})
 adminApi.interceptors.request.use((config) => {
   const t = localStorage.getItem('admin_token')
   if (t) config.headers.Authorization = `Bearer ${t}`

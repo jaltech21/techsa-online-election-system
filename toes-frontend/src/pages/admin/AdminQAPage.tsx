@@ -5,7 +5,11 @@ import AdminShell from '../../components/admin/AdminShell'
 
 // Shared axios instance that adds admin Bearer token
 import axios from 'axios'
-const questionsApi = axios.create({ baseURL: '/api/v1' })
+const questionsApi = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL
+    ? `${import.meta.env.VITE_API_BASE_URL}/api/v1`
+    : '/api/v1',
+})
 questionsApi.interceptors.request.use((config) => {
   const t = localStorage.getItem('admin_token')
   if (t) config.headers.Authorization = `Bearer ${t}`
